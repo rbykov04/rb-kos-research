@@ -1,4 +1,30 @@
 
+# 12
+Let's simplify ./cross-build.sh from hello
+Separate to 3 stages.
+
+Why do we need in this crossbuild.sh???
+
+
+```
+# configure
+cmake -B "$BUILD" \
+      -D BOARD="$BOARD" \
+      -D CMAKE_TOOLCHAIN_FILE="$SDK_PREFIX/toolchain/share/toolchain-$TARGET-clang.cmake"
+
+# build
+cmake --build "$BUILD" --target kos-qemu-image
+
+# run qemu
+cmake --build "$BUILD" --target sim
+```
+
+
+
+# 11
+Let's use cmake from ubuntu.
+
+
 # 10
 
 Let's simplify and make structure flat
