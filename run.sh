@@ -2,4 +2,7 @@
 
 
 # prepare build direcrory
-cd hello && ./cross-build.sh
+make hello/build
+
+# run qemu
+make run

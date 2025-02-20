@@ -1,24 +1,9 @@
-/*
- * © 2024 AO Kaspersky Lab
- */
-
-/* Description of a solution security policy. */
-
-/* Assign the execute interface. */
 execute: kl.core.Execute
 
-/* Include the base.psl file containing a formal description of the Base security model. */
 use nk.base._
 
-/* Include EDL files. */
 use EDL Einit
 use EDL kl.core.Core
-
 use EDL hello.Hello
 
-@INIT_EXTERNAL_ENTITIES@
-
-/* The security policy in this example allows any interaction between different processes and between processes and the KasperskyOS kernel. */
-/* It is done to simplify the example and should not be applied in a real-world solution. */
 use nonsecurity._
-

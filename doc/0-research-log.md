@@ -1,4 +1,7 @@
 
+# 13
+Move to Makefile. Get rid of crossbuild.sh
+
 # 12
 Let's simplify ./cross-build.sh from hello
 Separate to 3 stages.
