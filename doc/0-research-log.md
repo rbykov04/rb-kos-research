@@ -1,4 +1,75 @@
 
+# 18
+Let's research what is EinitQemu?
+
+1. init.yaml.in -> EinitQemu.c
+1. EinitQemu.c -> EinitQemu
+
+init.yaml is toml
+```
+entities:
+- name: hello.Hello
+```
+
+Let's eliminate init.yaml and use einit.c directly
+
+``````
+hello/Init: hello/init.c
+	${CC} hello/init.c -o hello/Init
+``
+
+It is not enough
+
+```
+[TASK ] Incompatible image for task 'einit'.
+
+[KERNEL PANIC]: Can't load init task.
+
+Check your security configuration in the PSL file.
+
+ESR = 0x0
+EC = 0x0
+Exception class: Unknown reason
+    EIID : kl.core.Core
+    Name : kl.core.Core
+    Path : 
+    TID  : 1
+    pc   : 0xffff808001055778
+    CPU  : 00
+
+Relocation base: <0000000000000000>
+Stack bounds: ffff80800106fff0 ffff808001077ff0
+Call Trace (Privileged Mode):
+    [<ffff808001055778>] ???
+    [<ffff808001055758>] ???
+    [<ffff80800103a610>] ???
+    [<ffff80800101bbe8>] ???
+    [<ffff808001008a38>] ???
+    [<ffff80800105010c>] ???
+
+System halted
+```
+
+Solution:
+
+```
+C_FLAGS  = -fstack-protector-strong -Wl,-z,relro -Wl,-z,now
+C_FLAGS += -O2 -mcpu=cortex-a72 -Wall -Wextra -Wconversion -Wsign-conversion -Wformat=2
+C_FLAGS += -Wformat-security -Werror=format-security
+C_FLAGS += -Werror=return-type -Werror=implicit-function-declaration
+C_FLAGS += -Wno-error=deprecated-declarations -fvisibility=hidden
+C_FLAGS += -fcommon
+C_FLAGS += -fno-omit-frame-pointer
+
+L_FLAGS  = -fstack-protector-strong -Wl,-z,relro -Wl,-z,now
+L_FLAGS += -O2 -mcpu=cortex-a72 -Wl,-z,noexecstack -Wl,-z,now
+L_FLAGS += -static -static-libgcc
+L_FLAGS += -static -no-pie
+L_FLAGS += -Wno-error=unused-command-line-argument -static
+
+INIT_FLAGS = ${C_FLAGS} ${L_FLAGS}
+```
+
 # 17 
 Can we build binary below without cmake?
 ```
