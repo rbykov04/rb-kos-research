@@ -12,8 +12,8 @@ QEMU_FLAGS+=--nographic -smp 4 -serial stdio -nographic
 QEMU_FLAGS+=-monitor none -nic none
 
 
-run: hello/build/kos-qemu-image
-	cd hello/build && \
+run: hello/kos-qemu-image
+	cd hello && \
     ${SDK}/toolchain/bin/qemu-system-aarch64 ${QEMU_FLAGS} -kernel kos-qemu-image
 
 hello/Hello: hello/hello.c
@@ -38,6 +38,26 @@ INIT_FLAGS = ${C_FLAGS} ${L_FLAGS}
 
 hello/Init: hello/init.c
 	${CC} --target=aarch64-kos ${INIT_FLAGS} hello/init.c  -o hello/Init
+
+
+
+
+
+ROOT_DIR            :=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+SECURITY_MODULE_SRC  = hello/security.psl.c
+PSL_GEN_FLAGS        = -P${SDK}/sysroot-aarch64-kos/include/system.platform
+PSL_GEN_FLAGS       += -I${SDK}/toolchain/include
+PSL_GEN_FLAGS       += -I${SDK}/sysroot-aarch64-kos/include
+PSL_GEN_FLAGS       += -I${SDK}/toolchain/include
+PSL_GEN_FLAGS       += -I${ROOT_DIR}/hello
+
+${SECURITY_MODULE_SRC}: hello/security.psl.in
+	cat hello/security.psl.in
+	${SDK}/toolchain/bin/nk-psl-gen-c \
+	security.psl.in \
+	${PSL_GEN_FLAGS} \
+	-o ${SECURITY_MODULE_SRC}
+
 
 SECURITY_MODULE_FLAGS = -fno-pic \
 						-D__KOS_KERNEL__ \
@@ -76,14 +96,13 @@ SECURITY_MODULE_FLAGS = -fno-pic \
 						-lclang_rt.builtins-aarch64
 
 
-SECURITY_MODULE_SRC = hello/build/EinitQemu-kss/security.psl.c
-${SECURITY_MODULE_SRC}: hello/build
+${SECURITY_MODULE_SRC}: ${SECURITY_MODULE_SRC}
 hello/ksm.module: ${SECURITY_MODULE_SRC}
 	${CC} ${SECURITY_MODULE_FLAGS} ${SECURITY_MODULE_SRC} -o hello/ksm.module
 
 
 
-hello/build/kos-qemu-image: hello/build hello/Hello
+hello/kos-qemu-image: hello/Hello hello/Init hello/ksm.module
 	${SDK}/toolchain/bin/kos_make_kimg \
 	--target=aarch64-kos \
 	--with-extra-ldflags=-no-pie \
@@ -92,7 +111,7 @@ hello/build/kos-qemu-image: hello/build hello/Hello
     --with-compiler=clang \
     --ldscript=${SDK}/libexec/aarch64-kos/kos-qemu.ld \
     --img-src=${SDK}/libexec/aarch64-kos/kos-qemu \
-    --img-dst=hello/build/kos-qemu-image \
+    --img-dst=hello/kos-qemu-image \
     --max-filesize= \
     --with-init=hello/Init \
     hello/Hello \
@@ -110,3 +129,8 @@ hello/build:
 
 clean:
 	rm -rf hello/build
+	rm -f hello/kos-qemu-image*
+	rm -f hello/Init
+	rm -f hello/Hello
+	rm -f hello/ksm.module
+	rm -f hello/security.psl.c

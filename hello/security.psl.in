@@ -4,7 +4,7 @@ use nk.base._
 
 use EDL Einit
 use EDL kl.core.Core
-use EDL hello.Hello
+use EDL Hello
 
 //Threat model - there are not threats
 

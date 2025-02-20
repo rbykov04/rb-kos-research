@@ -10,7 +10,7 @@
 
 
 static const EntityInfo taskInfo_hello_Hello_0 = {
-    .eiid = "hello.Hello",
+    .eiid = "Hello",
     .max_endpoints = 0,
     .endpoints = NK_NULL,
 };
@@ -28,18 +28,18 @@ int main(void) {
     /* initialize entities */
 
     task_hello_Hello_0 = EntityInitEx(
-        &taskInfo_hello_Hello_0, "hello.Hello", "Hello"
+        &taskInfo_hello_Hello_0, "Hello", "Hello"
     );
     if (!task_hello_Hello_0) {
         fprintf(
-            stderr, "Can't initialize task \"hello.Hello\"\n"
+            stderr, "Can't initialize task \"Hello\"\n"
         );
         return EXIT_FAILURE;
     }
 
     if (EntitySetArgs(task_hello_Hello_0, taskInfo_hello_Hello_0_args) != rcOk) {
         fprintf(
-            stderr, "Can't set args for task \"hello.Hello\"\n"
+            stderr, "Can't set args for task \"Hello\"\n"
         );
         return EXIT_FAILURE;
     }

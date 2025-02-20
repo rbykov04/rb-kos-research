@@ -1,3 +1,25 @@
+# 21
+get rid of cmake!
+```
+tree 
+.
+├── Einit.edl
+├── hello.c
+├── Hello.edl
+├── init.c
+├── init.yaml.in
+└── security.psl.in
+```
+
+# 20
+
+Progress:
+1. security.psl   -> "cmake magic" -> security.psl.c
+1. security.psl.c -> "cmake magic" -> ksm.module - DONE
+
+Let's build security.psl.c
+
+
 # 19
 Progress:
 ```
