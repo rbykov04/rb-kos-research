@@ -1,4 +1,53 @@
 
+# 16
+What is happening here:
+
+```
+hello/build:
+	cd hello && \
+	export PATH="${SDK}/toolchain/bin:${PATH}" && \
+	cmake -B "${BUILD}" \
+		-D BOARD="${BOARD}" \
+		-D CMAKE_TOOLCHAIN_FILE="${SDK}/toolchain/share/toolchain-${TARGET}-clang.cmake"
+	cd hello && cmake --build "${BUILD}" --target kos-qemu-image
+```
+
+It is so complicated!
+
+I can guess we do here: 
+1. prepare build dir
+1. do some cmake magic
+1. build kos-qemu-image
+
+Lets add extra build kos-qemu-image over cmake to unpack this stuff.
+
+Don't ask me how! But here it is:
+```
+hello/build/kos-qemu-image: hello/build
+	${SDK}/toolchain/bin/kos_make_kimg \
+    --target=aarch64-kos \
+    --with-extra-ldflags=-no-pie \
+    --sys-root=${SDK}/sysroot-aarch64-kos \
+    --with-toolchain=${SDK}/toolchain \
+    --with-compiler=clang \
+    --ldscript=${SDK}/libexec/aarch64-kos/kos-qemu.ld \
+    --img-src=${SDK}/libexec/aarch64-kos/kos-qemu \
+    --img-dst=hello/build/kos-qemu-image \
+    --max-filesize= \
+    --with-init=hello/build/EinitQemu \
+    hello/build/Hello \
+    hello/build/EinitQemu-kss/ksm.module
+```
+
+Pay attansion: to 
+
+```
+    --with-init=hello/build/EinitQemu  - it is init binary
+    hello/build/Hello  - it is hello binary
+    hello/build/EinitQemu-kss/ksm.module - it is security.module
+```
+
+
 # 15
 Why do we need cmake to run qemu??
 

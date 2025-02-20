@@ -1,4 +1,4 @@
-.PHONY: clean run
+.PHONY: clean run hello/einit/kos-qemu-image
 
 BUILD=build
 
@@ -11,9 +11,26 @@ QEMU_FLAGS+=-monitor none -nic none
 
 
 
-run: hello/build
+run: hello/build/kos-qemu-image
 	cd hello/build && \
     ${SDK}/toolchain/bin/qemu-system-aarch64 ${QEMU_FLAGS} -kernel kos-qemu-image
+
+hello/build/kos-qemu-image: hello/build
+	${SDK}/toolchain/bin/kos_make_kimg \
+    --target=aarch64-kos \
+    --with-extra-ldflags=-no-pie \
+    --sys-root=${SDK}/sysroot-aarch64-kos \
+    --with-toolchain=${SDK}/toolchain \
+    --with-compiler=clang \
+    --ldscript=${SDK}/libexec/aarch64-kos/kos-qemu.ld \
+    --img-src=${SDK}/libexec/aarch64-kos/kos-qemu \
+    --img-dst=hello/build/kos-qemu-image \
+    --max-filesize= \
+    --with-init=hello/build/EinitQemu \
+    hello/build/Hello \
+    hello/build/EinitQemu-kss/ksm.module
+
+
 
 hello/build:
 	cd hello && \
