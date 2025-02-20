@@ -1,3 +1,32 @@
+# 19
+Progress:
+```
+    --with-init=hello/build/EinitQemu  - DONE
+    hello/build/Hello  - DONE
+    hello/build/EinitQemu-kss/ksm.module - it is security.module
+```
+
+But how to build security.module?
+
+1. security.psl   -> "cmake magic" -> security.psl.c
+1. security.psl.c -> "cmake magic" -> ksm.module
+
+Can we just use security.psl.c?
+
+Maybe? but
+
+```
+wc -l hello/build/EinitQemu-kss/security.psl.c 
+34241 hello/build/EinitQemu-kss/security.psl.c
+```
+32241 line of c code.
+
+Maybe in future we work on this.
+
+Lets reimpliment cmake and start with ksm.module 
+
+
+
 
 # 18
 Let's research what is EinitQemu?

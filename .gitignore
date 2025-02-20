@@ -1,3 +1,4 @@
 hello/build/*
 hello/Hello
 hello/Init
+hello/ksm.module
