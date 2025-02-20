@@ -1,4 +1,25 @@
 
+# 17 
+Can we build binary below without cmake?
+```
+    --with-init=hello/build/EinitQemu  - it is init binary
+    hello/build/Hello  - it is hello binary
+    hello/build/EinitQemu-kss/ksm.module - it is security.module
+```
+
+Let's try with hello.
+
+Result:
+
+```
+TOOLCHAIN  = "${SDK}/toolchain"
+CC         = "${TOOLCHAIN}/bin/aarch64-kos-clang"
+
+hello/Hello: hello/hello.c
+	${CC} hello/hello.c -o hello/Hello
+```
+
+
 # 16
 What is happening here:
 
@@ -39,7 +60,7 @@ hello/build/kos-qemu-image: hello/build
     hello/build/EinitQemu-kss/ksm.module
 ```
 
-Pay attansion: to 
+Pay attention to 
 
 ```
     --with-init=hello/build/EinitQemu  - it is init binary

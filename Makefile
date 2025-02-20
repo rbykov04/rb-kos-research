@@ -2,20 +2,24 @@
 
 BUILD=build
 
-TARGET="aarch64-kos"
-BOARD="RPI4_BCM2711"
-SDK="/opt/KasperskyOS-Community-Edition-RaspberryPi4b-1.3.0.166"
+TARGET     ="aarch64-kos"
+BOARD      ="RPI4_BCM2711"
+SDK        ="/opt/KasperskyOS-Community-Edition-RaspberryPi4b-1.3.0.166"
+TOOLCHAIN  = "${SDK}/toolchain"
+CC         = "${TOOLCHAIN}/bin/aarch64-kos-clang"
 QEMU_FLAGS =-m 2048 -machine vexpress-a15,secure=on -cpu cortex-a72
 QEMU_FLAGS+=--nographic -smp 4 -serial stdio -nographic
 QEMU_FLAGS+=-monitor none -nic none
-
 
 
 run: hello/build/kos-qemu-image
 	cd hello/build && \
     ${SDK}/toolchain/bin/qemu-system-aarch64 ${QEMU_FLAGS} -kernel kos-qemu-image
 
-hello/build/kos-qemu-image: hello/build
+hello/Hello: hello/hello.c
+	${CC} hello/hello.c -o hello/Hello
+
+hello/build/kos-qemu-image: hello/build hello/Hello
 	${SDK}/toolchain/bin/kos_make_kimg \
     --target=aarch64-kos \
     --with-extra-ldflags=-no-pie \
@@ -27,7 +31,7 @@ hello/build/kos-qemu-image: hello/build
     --img-dst=hello/build/kos-qemu-image \
     --max-filesize= \
     --with-init=hello/build/EinitQemu \
-    hello/build/Hello \
+    hello/Hello \
     hello/build/EinitQemu-kss/ksm.module
 
 
