@@ -1,11 +1,29 @@
 
-* 9
+# 10
+
+Let's simplify and make structure flat
+```
+ ~/dev/github/rb-kos-research   main  (cd hello && tree)
+.
+├── CMakeLists.txt
+├── cross-build.sh
+├── hello.c
+├── Hello.edl
+├── init.yaml.in
+└── security.psl.in
+
+1 directory, 6 files
+
+
+```
+
+
+# 9
 ./cross-build.sh 
 
-it is works
+[it is works](0-report-run-first-kos.md)
 
-
-* 8
+# 8
 go to 
 
 /opt/KasperskyOS-Community-Edition-RaspberryPi4b-1.3.0.166/examples:
@@ -28,7 +46,7 @@ yes!
 
 
 
-* 6
+# 6
 
 sudo dpkg -i libncurses5_6.2-0ubuntu2.1_amd64.deb 
 Selecting previously unselected package libncurses5:amd64.
@@ -49,7 +67,7 @@ install
 
 
 
-* 5
+# 5
 ** problem:
 lsb_release -a
 No LSB modules are available.
@@ -96,7 +114,7 @@ wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ub
 sudo apt install ./libtinfo5_6.3-2ubuntu0.1_amd64.deb
 
 
-* 3
+# 3
 
 sudo apt install python-is-python3
 sudo apt install u-boot-tools 
@@ -105,7 +123,7 @@ sudo apt install mtools
 sudo apt install gcc-aarch64-linux-gnu
 sudo apt install fdisk 
 
-* 2
+# 2
 
 
 pkg: dependency problems prevent configuration of kasperskyos-community-edition-raspberrypi4b:
@@ -131,13 +149,13 @@ pkg: dependency problems prevent configuration of kasperskyos-community-edition-
 
 
 
-* 1
+# 1
 
 dpkg -i KasperskyOS-Community-Edition-RaspberryPi4b-1.3.0.166_ru.deb
 
 
 
-* Start
+# Start
 
 https://os.kaspersky.ru/download-community-edition/
 KasperskyOS Community Edition 1.3.0
