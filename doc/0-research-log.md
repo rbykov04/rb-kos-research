@@ -1,4 +1,12 @@
 
+# 15
+Why do we need cmake to run qemu??
+
+We need just this:
+```
+${SDK}/toolchain/bin/qemu-system-aarch64 ${QEMU_FLAGS} -kernel kos-qemu-image
+```
+
 # 14
 Make policy file self contained.
 
