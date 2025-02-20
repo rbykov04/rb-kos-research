@@ -1,4 +1,26 @@
 
+# 14
+Make policy file self contained.
+
+Threat model - there are not threats:
+
+```
+execute: kl.core.Execute
+
+use nk.base._
+
+use EDL Einit
+use EDL kl.core.Core
+use EDL hello.Hello
+
+execute  { grant () }
+request  { grant () }
+response { grant () }
+security { grant () }
+error    { grant () }
+```
+
+
 # 13
 Move to Makefile. Get rid of crossbuild.sh
 
