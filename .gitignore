@@ -4,3 +4,4 @@ hello/Init
 hello/ksm.module
 hello/kos-qemu-image*
 microhs/MicroHs
+microhs/out.comb

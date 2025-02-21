@@ -1,3 +1,61 @@
+# 25
+Progress:
+- what is bin/ghms ?
+- what is bin/mhsevel ?
+- maybe run same examples on linux?
+- what is in bin folder?
+
+Let's build create an example on Linux
+
+What I made:
+```
+ ~/dev/github/rb-kos-research/microhs   main ●  cat Hello.hs 
+module Hello where
+
+main :: IO ()
+main = do
+  let a = "Hello form haskell" in print a
+```
+
+```
+ ~/dev/github/rb-kos-research/microhs   main ●  cat Makefile      
+.PHONY: distclean clean
+
+run: out.comb
+	./MicroHs/bin/mhseval
+
+out.comb: Hello.hs
+	MicroHs/bin/gmhs -iMicroHs/lib Hello
+
+clean:
+	rm -rf out.comb
+```
+
+It works:
+```
+ ~/dev/github/rb-kos-research/microhs   main ●  make clean && make
+rm -rf out.comb
+MicroHs/bin/gmhs -iMicroHs/lib Hello
+./MicroHs/bin/mhseval
+"Hello form haskell"
+```
+
+It maybe curies what is in out.comb: (first )
+```
+~/dev/github/rb-kos-research/microhs   main ●  cat out.comb
+v7.0
+252
+A _247 _142 _164 @@_248 _250 I @@fromUTF8 "Hello form haskell" @@@:251 @
+A K _249 I @@:250 @
+A U :249 @
+A U I @:248 @
+A B B _246 @@_134 @:247 @
+A _237 _245 @:246 @
+A _243 _244 @_231 @fromUTF8 "stdout" @@:245 @
+A IO.stdout :244 @
+<---CUT----->
+```
+
 # 24 
 I cloned https://github.com/augustss/MicroHs
 Let's play on ubuntu with this
