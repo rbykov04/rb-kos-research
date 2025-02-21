@@ -1,3 +1,43 @@
+# 26
+## Progress:
+- what is bin/ghms - compiler itself. It compiles file.hs -> out.comb
+- what is bin/mhsevel - utility to run out.comb
+- maybe run same examples on linux - DONE
+- what is in bin folder -DONE
+
+tree MicroHs/bin
+MicroHs/bin
+├── gmhs
+└── mhseval
+
+
+## Active
+
+To port this to KasperskyOS we need build binary without out.comb
+There is example on Stm32 in MicroHs.
+
+Let's read example and build simple binary
+
+
+Ok we did this
+
+```
+MHSDIR=MicroHs MicroHs/bin/gmhs -iMicroHs/lib Hello -oHello.comb
+MicroHs/bin/mhseval +RTS -rHello.comb -oHello-opt.comb
+./Addcombs Hello-opt.comb Hello.c
+clang \
+	ffi.c \
+	Hello.c \
+	MicroHs/src/runtime/eval-unix-64.c \
+	-lm\
+	-static \
+	-o Hello
+./Hello
+"Hello form haskell"
+
+```
+
+
 # 25
 Progress:
 - what is bin/ghms ?

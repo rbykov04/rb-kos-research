@@ -5,3 +5,9 @@ hello/ksm.module
 hello/kos-qemu-image*
 microhs/MicroHs
 microhs/out.comb
+microhs/Hello
+microhs/Hello.c
+microhs/Hello.comb
+microhs/Hello-opt.comb
+microhs/Addcombs
+microhs/.mhsi
