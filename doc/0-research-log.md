@@ -1,3 +1,6 @@
+# 22
+Let's make example hello selfcontainted and move Makefile to example
+
 # 21
 get rid of cmake!
 ```

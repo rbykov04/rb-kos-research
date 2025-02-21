@@ -1,10 +1,8 @@
-execute: kl.core.Execute
-
 use nk.base._
 
-use EDL Einit
-use EDL kl.core.Core
-use EDL Hello
+task class Einit        : Einit
+task class kl.core.Core : kl.core.Core
+task class Hello        : Hello
 
 //Threat model - there are not threats
 
