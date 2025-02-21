@@ -1,3 +1,78 @@
+# 24 
+I cloned https://github.com/augustss/MicroHs
+Let's play on ubuntu with this
+
+There is a Makefile
+
+```
+~/dev/github/rb-kos-research/microhs/MicroHs   master  make
+echo "[default]"         > targets.conf
+echo cc = \"cc\"     >> targets.conf
+echo ccflags = \"\" >> targets.conf
+echo conf = \"unix-64\" >> targets.conf
+echo ''                 >> targets.conf
+echo "[emscripten]"     >> targets.conf
+echo cc = \"emcc -sALLOW_MEMORY_GROWTH -sTOTAL_STACK=5MB -sNODERAWFS -sSINGLE_FILE -DUSE_SYSTEM_RAW\"   >> targets.conf
+echo conf = \"unix-64\" >> targets.conf
+cc -Wall -O3  -Isrc/runtime src/runtime/eval-unix-64.c -lm generated/mhs.c -o bin/mhs
+cc -Wall -O3  -Isrc/runtime src/runtime/eval-unix-64.c -lm generated/cpphs.c -o bin/cpphs
+cc -Wall -O3  -Isrc/runtime src/runtime/eval-unix-64.c -lm generated/mcabal.c -o bin/mcabal
+```
+
+Ok
+
+```
+~/dev/github/rb-kos-research/microhs/MicroHs   master  make runtest
+cc -Wall -O3  -Isrc/runtime src/runtime/eval-unix-64.c -lm src/runtime/comb.c -o bin/mhseval
+size bin/mhseval
+   text	   data	    bss	    dec	    hex	filename
+ 122996	   5792	   3448	 132236	  2048c	bin/mhseval
+ghc -DNOTCABAL -XScopedTypeVariables -XTypeSynonymInstances -XMultiParamTypeClasses -XFlexibleInstances -ighc -isrc -ipaths -Wall -Wno-unrecognised-warning-flags -Wno-x-partial -Wno-deprecations -O  -package mtl -package pretty -package haskeline -package process -package time -package ghc-prim -package containers -package deepseq -package directory -package text -outputdir ghc-out  -main-is MicroHs.Main MicroHs.Main -o bin/gmhs
+[ 1 of 45] Compiling Data.Integer     ( ghc/Data/Integer.hs, ghc-out/Data/Integer.o )
+
+<----------- CAT of output ------------------>
+
+[44 of 45] Compiling MicroHs.Main     ( src/MicroHs/Main.hs, ghc-out/MicroHs/Main.o )
+[45 of 45] Linking bin/gmhs
+
+
+cd tests; make alltest
+
+../bin/gmhs -i../lib Info       && ../bin/mhseval +RTS -H1M -RTS
+Running on Unix
+64 bit words, little endian
+../bin/gmhs -i../lib Hello      && ../bin/mhseval +RTS -H1M -RTS > Hello.out      && diff Hello.ref Hello.out
+../bin/gmhs -i../lib Serdes     && ../bin/mhseval +RTS -H1M -RTS > Serdes.out     && diff Serdes.ref Serdes.out
+
+<-------- CAT of output ---------------->
+../bin/gmhs -i../lib ByteStringIO && ../bin/mhseval +RTS -H1M -RTS > ByteStringIO.out && diff ByteStringIO.ref ByteStringIO.out
+sh errtester.sh ../bin/gmhs < errmsg.test
+
+```
+
+It builded and tested
+
+Next step:
+- what is bin/ghms ?
+- what is bin/mhsevel ?
+- maybe run same examples on linux?
+- what is in bin folder?
+
+
+# 23
+
+To move forward We need write programms on some language.
+From Box - threre are 3 of them
+
+- C
+- C++
+- Rust
+
+But what if I want to use haskell?
+Let's port haskell to KasperskyOS.
+Let's try with
+https://github.com/augustss/MicroHs
+
 # 22
 Let's make example hello selfcontainted and move Makefile to example
 
