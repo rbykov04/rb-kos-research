@@ -1,3 +1,58 @@
+
+# 31
+We can build Haskell programm for KOS. Let's to run in KOS.
+
+# 30
+Progress:
+```
+RUNTIME=MicroHs/src/runtime
+Hello: Hello.c
+	clang \                         - TODO: replace with clang from SDK
+		ffi.c \ 
+		Hello.c \
+		eval-kos-64.c \
+		-static \
+		-o Hello
+```
+
+Ok. Let's try use clang from SDK
+
+Ok!
+```
+MHSDIR=MicroHs MicroHs/bin/gmhs -iMicroHs/lib Hello -oHello.comb
+MicroHs/bin/mhseval +RTS -rHello.comb -oHello-opt.comb
+./Addcombs Hello-opt.comb Hello.c
+"""/opt/KasperskyOS-Community-Edition-RaspberryPi4b-1.3.0.166"/toolchain"/bin/aarch64-kos-clang" \
+	ffi.c \
+	Hello.c \
+	eval-kos-64.c \
+	-static \
+	-o Hello
+ ~/dev/github/rb-kos
+```
+
+
+
+
+# 29
+Progress:
+```
+RUNTIME=MicroHs/src/runtime
+Hello: Hello.c
+	clang \                         - TODO: replace with clang from SDK
+		ffi.c \ 
+		Hello.c \
+		eval-kos-64.c \
+		-lm\                        - TODO: Use lib from SDK / or drop support of math (temprary)
+		-static \
+		-o Hello
+```
+
+Let's remove -lm.
+Ok:)_
+It worsk
+
+
 # 28
 Progress:
 ```
@@ -79,6 +134,54 @@ cat MicroHs/src/runtime/config-micro-64.h
 
 OK. Let's try build and run this config on ubuntu first.
 
+Result
+```
+ ~/dev/github/rb-kos-research/microhs   main ●  cat config-kos-64.h 
+#define WANT_STDIO 1
+#if WANT_STDIO
+#include <unistd.h>
+#endif  /* WANT_STDIO */
+
+#define WANT_FLOAT 0
+
+#define WANT_MATH 0
+#define WANT_MD5 0
+
+#define WANT_TICK 1
+#define WANT_ARGS 1
+
+//#define WORD_SIZE 64
+
+/* #define FFS ffsl */
+/* #define PCOMMA "'" */
+/* #define GETRAW */
+/* #define GETTIMEMILLI */
+/* #define ERR(s) */
+/* #define ERR1(s,a) */
+
+#define GCRED    0              /* do some reductions during GC */
+#define FASTTAGS 0              /* compute tag by pointer subtraction */
+#define INTTABLE 0              /* use fixed table of small INT nodes */
+#define SANITY   0              /* do some sanity checks */
+#define STACKOVL 0              /* check for stack overflow */
+```
+
+I enabled stdio + tick + args
+```
+In file included from eval-kos-64.c:3:
+./MicroHs/src/runtime/eval.c:4608:45: error: call to undeclared function 'unlink'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+ 4608 | void mhs_unlink(int s) { mhs_from_Int(s, 1, unlink(mhs_to_Ptr(s, 0))); }
+      |                                             ^
+1 error generated.
+
+
+```
+I had problem with unlink and add this include
+```
+#if WANT_STDIO
+#include <unistd.h>
+#endif  /* WANT_STDIO */
+```
 
 # 27
 Ok. We can build and run binary of haskell programm.

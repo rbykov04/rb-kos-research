@@ -6,17 +6,25 @@ LIB=MicroHs/lib
 TOOLS=MicroHs/Tools
 RUNTIME=MicroHs/src/runtime
 
+BUILD=build
+TARGET     ="aarch64-kos"
+BOARD      ="RPI4_BCM2711"
+SDK        ="/opt/KasperskyOS-Community-Edition-RaspberryPi4b-1.3.0.166"
+TOOLCHAIN  = "${SDK}/toolchain"
+CC         = "${TOOLCHAIN}/bin/aarch64-kos-clang"
 
-run: Hello
-	./Hello
+
 
 Hello: Hello.c
-	clang \
+	${CC} \
 		ffi.c \
 		Hello.c \
 		eval-kos-64.c \
 		-static \
 		-o Hello
+
+runHost: HelloHost
+	./HelloHost
 
 
 
