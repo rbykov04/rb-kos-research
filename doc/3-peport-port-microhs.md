@@ -44,7 +44,7 @@ Makefile          - from hello example but modified
 security.psl      - from hello example
 ```
 
-Let`s see clean from old stuff
+Let`s clean from old stuff
 
 ```
 config-kos-64.h
@@ -412,9 +412,6 @@ A _237 _245 @_246 _248 I @@fromUTF8 "Hello form haskell" @@@:249 @
 
 And then we have Hello.c
 ```
-Hello.comb: Hello.hs MicroHs
-	MHSDIR=$(MHSDIR) $(BIN)/gmhs -i$(LIB) Hello -oHello.comb
-
 static unsigned char combexprdata[] = {
 118,55,46,48,10,55,52,10,83,39,32,67,39,32,85,32,75,50,32,75,
 <---------------------------CUT-------------------->
@@ -666,7 +663,7 @@ Why do we need hPutStrLn stderr?
 
 This is because in our small system we don't have posix support.
 In KasperskyOs stdout implemented with virtual filesystem "vfs" (special process).
-Without this stoud doesn't work. So we will use stderr instead.
+Without this stdout doesn't work. So we will use stderr instead (looks like a hack in libc kasperskyOS).
 
 ## Let's run
 
