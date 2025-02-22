@@ -1,3 +1,154 @@
+# 28
+Progress:
+```
+RUNTIME=MicroHs/src/runtime
+Hello: Hello.c
+	clang \                         - TODO: replace with clang from SDK
+		ffi.c \ 
+		Hello.c \
+		${RUNTIME}/eval-unix-64.c \ - TODO: Research
+		-lm\                        - TODO: Use lib from SDK / or drop support of math (temprary)
+		-static \
+		-o Hello
+```
+
+Let's research eval-unix-64.c. wj
+```
+ ~/dev/github/rb-kos-research/microhs   main ●  cat MicroHs/src/runtime/eval-unix-64.c 
+/* Copyright 2023 Lennart Augustsson
+ * See LICENSE file for full license.
+ */
+#include "config-unix-64.h"
+
+#include "eval.c"
+```
+
+Research list of platforms
+
+```
+ ~/dev/github/rb-kos-research/microhs   main ●  ls -1 MicroHs/src/runtime/eval-*
+MicroHs/src/runtime/eval-c64.c
+MicroHs/src/runtime/eval-esp32.c
+MicroHs/src/runtime/eval-micro-64.c
+MicroHs/src/runtime/eval-mingw-64.c
+MicroHs/src/runtime/eval-stm32f4.c
+MicroHs/src/runtime/eval-unix-32.c
+MicroHs/src/runtime/eval-unix-64.c
+MicroHs/src/runtime/eval-windows-64.c
+```
+
+Ok. I prefer choose the smallest config in the begging.
+```
+cat MicroHs/src/runtime/eval-micro-64.c 
+/* Copyright 2023 Lennart Augustsson
+ * See LICENSE file for full license.
+ */
+#include "config-micro-64.h"
+
+#include "eval.c"
+```
+Let's see config. (I will cut comment to minimaze content)
+```
+cat MicroHs/src/runtime/config-micro-64.h 
+#define WANT_STDIO 0
+#define WANT_FLOAT 0
+#define WANT_MATH 0
+#define WANT_MD5 0
+#define WANT_TICK 0
+
+/* * Process argc, argv */
+#define WANT_ARGS 0
+/* * Number of bits in a word.  Only 32 and 64 are supported. */
+//#define WORD_SIZE 64
+
+/* #define FFS ffsl */
+/* #define PCOMMA "'" */
+/* #define GETRAW */
+
+
+/* #define GETTIMEMILLI */
+/* #define ERR(s) */
+/* #define ERR1(s,a) */
+
+#define GCRED    0              /* do some reductions during GC */
+#define FASTTAGS 0              /* compute tag by pointer subtraction */
+#define INTTABLE 0              /* use fixed table of small INT nodes */
+#define SANITY   0              /* do some sanity checks */
+#define STACKOVL 0              /* check for stack overflow */
+```
+
+OK. Let's try build and run this config on ubuntu first.
+
+
+# 27
+Ok. We can build and run binary of haskell programm.
+
+Let's try to build this to kos.
+
+What do we have?
+
+```
+Hello: Hello.c
+	clang \
+		ffi.c \
+		Hello.c \
+		${RUNTIME}/eval-unix-64.c \
+		-lm\
+		-static \
+		-o Hello
+```
+
+**clang** we can use clang from sdk.
+
+**ffi.c** is simple:
+```
+ ~/dev/github/rb-kos-research/microhs   main ●  cat ffi.c 
+#include "MicroHs/src/runtime/mhsffi.h"
+static struct ffi_entry table[] = {
+{ 0,0 }
+};
+struct ffi_entry *xffi_table = table;
+
+```
+
+**Hello.c** - I don't expect problem with this. Maybe we will have problem when we will run this.
+(For Exxample: Memory in system is not enought). 
+```
+~/dev/github/rb-kos-research/microhs   main  cat Hello.c
+static unsigned char combexprdata[] = {
+32,64,64,64,67,39,32,67,39,32,66,32,85,32,64,67,32,85,32,75,
+<--------------------CUT------------------------>
+32,34,72,101,108,108,111,32,102,111,114,109,32,104,97,115,107,101,108,108,
+34,32,64,64,64,125,
+};
+const unsigned char *combexpr = combexprdata;
+const int combexprlen = 7386;
+```
+
+
+
+**-lm** - is not a problem
+```
+~/dev/github/rb-kos-research/microhs   main  ls /opt/KasperskyOS-Community-Edition-RaspberryPi4b-1.3.0.166/sysroot-aarch64-kos/lib | grep libm
+libm.a
+```
+
+
+**${RUNTIME}/eval-unix-64.c** - ? I need research this.
+
+Resume and plan
+```
+Hello: Hello.c
+	clang \                         - TODO: replace with clang from SDK
+		ffi.c \ 
+		Hello.c \
+		${RUNTIME}/eval-unix-64.c \ - TODO: Research
+		-lm\                        - TODO: Use lib from SDK / or drop support of math (temprary)
+		-static \
+		-o Hello
+```
+
+
 # 26
 ## Progress:
 - what is bin/ghms - compiler itself. It compiles file.hs -> out.comb

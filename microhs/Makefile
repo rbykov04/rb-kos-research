@@ -14,10 +14,20 @@ Hello: Hello.c
 	clang \
 		ffi.c \
 		Hello.c \
+		eval-kos-64.c \
+		-static \
+		-o Hello
+
+
+
+HelloHost: Hello.c
+	clang \
+		ffi.c \
+		Hello.c \
 		${RUNTIME}/eval-unix-64.c \
 		-lm\
 		-static \
-		-o Hello
+		-o HelloHost
 
 
 Hello.c: Hello-opt.comb Addcombs
