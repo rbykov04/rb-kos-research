@@ -90,14 +90,6 @@ kos-qemu-image: Hello Init ksm.module
     Hello \
     ksm.module
 
-clean:
-	rm -f kos-qemu-image*
-	rm -f Init
-	rm -f Hello
-	rm -f ksm.module
-	rm -f security.psl.c
-
-
 
 Hello: Hello.c
 	${CC} \
@@ -128,25 +120,21 @@ Hello.c: Hello-opt.comb Addcombs
 Hello-opt.comb: Hello.comb
 	$(BIN)/mhseval +RTS -rHello.comb -oHello-opt.comb
 
-Hello.comb: Hello.hs
+Hello.comb: Hello.hs MicroHs
 	MHSDIR=$(MHSDIR) $(BIN)/gmhs -i$(LIB) Hello -oHello.comb
 
-
-Addcombs:
+Addcombs: MicroHs
 	MHSDIR=$(MHSDIR) $(BIN)/gmhs -i$(TOOLS) Addcombs -oAddcombs
-
-
-out.comb: Hello.hs
-	MicroHs/bin/gmhs -iMicroHs/lib Hello
 
 test: MicroHs
 	cd MicroHs && make runtest
 
 MicroHs:
 	git clone https://github.com/augustss/MicroHs
+	cd MicroHs && make bin/mhseval
+	cd MicroHs && make bin/gmhs
 
 clean:
-	rm -rf out.comb
 	rm -rf Hello.c
 	rm -rf Hello
 	rm -rf Hello.comb
@@ -154,6 +142,8 @@ clean:
 	rm -f kos-qemu-image*
 	rm -f Init
 	rm -f Hello
+	rm -f HelloHost
+	rm -f Addcombs
 	rm -f ksm.module
 	rm -f security.psl.c
 
