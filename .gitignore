@@ -3,6 +3,8 @@ hello/Hello
 hello/Init
 hello/ksm.module
 hello/kos-qemu-image*
+hello/security.psl.c
+
 microhs/MicroHs
 microhs/out.comb
 microhs/Hello
@@ -12,7 +14,6 @@ microhs/Hello.comb
 microhs/Hello-opt.comb
 microhs/Addcombs
 microhs/.mhsi
-
 microhs/build/*
 microhs/Hello
 microhs/Init
