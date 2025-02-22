@@ -20,3 +20,8 @@ microhs/Init
 microhs/security.psl.c
 microhs/ksm.module
 microhs/kos-qemu-image*
+
+agda-hello/agda-hello.agdai
+agda-hello/agda-hello
+agda-hello/_build
+agda-hello/MAlonzo

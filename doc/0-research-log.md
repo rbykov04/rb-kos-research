@@ -1,4 +1,111 @@
 
+# 32
+Ok. Let's start play with agda.
+https://agda.readthedocs.io/en/v2.6.0.1/getting-started/hello-world.html
+```
+ ~/dev/github/rb-kos-research/agda-hello   main ●  cat Hello.agda
+module Hello where
+
+open import IO
+
+main = run (putStrLn "Hello, World from agda!")
+
+```
+```
+agda --compile Hello.agda
+Checking Hello (~/github/rb-kos-research/agda-hello/Hello.agda).
+~/github/rb-kos-research/agda-hello/Hello.agda:3,1-15
+Failed to find source of module IO in any of the following
+locations:
+  ~/github/rb-kos-research/agda-hello/IO.agda
+  ~github/rb-kos-research/agda-hello/IO.lagda
+  /usr/share/libghc-agda-dev/lib/prim/IO.agda
+  /usr/share/libghc-agda-dev/lib/prim/IO.lagda
+when scope checking the declaration
+  open import IO
+make: *** [Makefile:4: Hello] Error 42
+```
+
+
+agda can't find its own stdlib. :D
+```
+ ~/dev/github/rb-kos-research/agda-hello   main ●  agda --print-agda-dir 
+/usr/share/libghc-agda-dev
+ ~/dev/github/rb-kos-research/agda-hello   main ●  ls -1 /usr/share | grep agda
+agda-stdlib
+libghc-agda-dev
+```
+
+I instaled stdlib in dev dir.
+```
+agda-hello: agda-hello.agda
+	agda  -i.  --compile --library=standard-library-2.2 agda-hello.agda
+
+```
+
+And it works!
+
+But
+```
+~/dev/github/rb-kos-research/agda-hello   main ●  tree
+.
+├── agda-hello
+├── agda-hello.agda
+├── agda-hello.agdai
+├── _build
+│   └── 2.6.3
+│       └── agda
+│           └── agda-hello.agdai
+├── Makefile
+└── MAlonzo
+    ├── Code
+    │   ├── Agda
+    │   │   ├── Builtin
+    │   │   │   ├── Bool.hs
+    │   │   │   ├── Char.hs
+    │   │   │   ├── IO.hi
+    │   │   │   ├── IO.hs
+    │   │   │   ├── IO.o
+    │   │   │   ├── List.hs
+    │   │   │   ├── Maybe.hs
+    │   │   │   ├── Nat.hs
+    │   │   │   ├── Sigma.hs
+    │   │   │   ├── String.hi
+    │   │   │   ├── String.hs
+    │   │   │   ├── String.o
+    │   │   │   ├── Unit.hi
+    │   │   │   ├── Unit.hs
+    │   │   │   └── Unit.o
+    │   │   └── Primitive.hs
+    │   ├── QagdaZ45Zhello.hi
+    │   ├── QagdaZ45Zhello.hs
+    │   └── QagdaZ45Zhello.o
+    ├── RTE
+    │   └── Float.hs
+    ├── RTE.hi
+    ├── RTE.hs
+    └── RTE.o
+
+
+
+```
+
+We haven't build even two file haskell for MicroHs
+
+# 31
+I have a crazy idea.
+
+1. We can compile haskell to c and run into KasperskyOS
+1. We can complile agda to haskell.
+
+What if...
+What if we ...
+What if we compile agda to haskell to compule to c and run KasperskyOS
+
+Let's run simple research
+
+
+
 # 31
 We can build Haskell programm for KOS. Let's to run in KOS.
 
