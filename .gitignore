@@ -6,8 +6,16 @@ hello/kos-qemu-image*
 microhs/MicroHs
 microhs/out.comb
 microhs/Hello
+microhs/HelloHost
 microhs/Hello.c
 microhs/Hello.comb
 microhs/Hello-opt.comb
 microhs/Addcombs
 microhs/.mhsi
+
+microhs/build/*
+microhs/Hello
+microhs/Init
+microhs/security.psl.c
+microhs/ksm.module
+microhs/kos-qemu-image*

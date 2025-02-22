@@ -1,0 +1,13 @@
+use nk.base._
+
+task class Einit        : Einit
+task class kl.core.Core : kl.core.Core
+task class Hello        : Hello
+
+//Threat model - there are not threats
+
+execute  { grant () }
+request  { grant () }
+response { grant () }
+security { grant () }
+error    { grant () }

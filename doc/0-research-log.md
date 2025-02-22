@@ -2,6 +2,41 @@
 # 31
 We can build Haskell programm for KOS. Let's to run in KOS.
 
+Ok. In KOS we have to print we have either connect with vfs or print stderr. Ok. Let's print to std err 
+
+```
+
+Loading:
+ _  __                             _           ___  ____
+| |/ /__ _ ___ _ __   ___ _ __ ___| | ___   _ / _ \/ ___|
+| ' // _` / __| '_ \ / _ \ '__/ __| |/ / | | | | | \___ \
+| . \ (_| \__ \ |_) |  __/ |  \__ \   <| |_| | |_| |___) |
+|_|\_\__,_|___/ .__/ \___|_|  |___/_|\_\\__, |\___/|____/
+              |_|                       |___/
+
+
+Built on:   Jan 29 2025 08:35:32
+Board:      vexpress_qemu
+SoC:        v2pca15
+ARCH:       arm64
+Git hash:   toolchain_stage1-v1.0-7470-g7720fb4a876660ee3be4b3317682e6d2bfbe2181
+
+
+Found CPU: ARMv8
+<----- CUT ----->
+[ROFS ] Files: 3, size: 2195456 (0x00218000).
+[ROFS ] File #00: einit            - size:   939664 (0x000e5690)
+[ROFS ] File #01: Hello            - size:  1163960 (0x0011c2b8)
+[ROFS ] File #02: ksm.module       - size:    78024 (0x000130c8)
+
+<----- CUT ----->
+
+Hello form haskell
+
+[INIT ] System worker finished
+[INIT ] System halted...
+```
+
 # 30
 Progress:
 ```
