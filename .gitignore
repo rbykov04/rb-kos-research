@@ -25,3 +25,5 @@ microhs/kos-qemu-image*
 agda-hello/Hello
 agda-hello/_build
 agda-hello/MAlonzo
+agda-hello/.mhsi
+agda-hello/MicroHs

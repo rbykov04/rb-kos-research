@@ -1,4 +1,17 @@
 
+# 34
+Progress:
+I.   Separate build two step - DONE
+II.  Replace ghc to microhs 
+III. Build to kos
+IV.  Run :)
+
+Let's use mhs.
+
+I have achived this but. But I have error of compiling which requere some effort from me
+
+
+
 # 33
 OK. 
 1. We have agda-hello.agda
