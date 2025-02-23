@@ -1,4 +1,52 @@
 
+# 33
+OK. 
+1. We have agda-hello.agda
+2. We can compile to haskell and build to binary with agda --compile 
+
+Now we have a plan A:
+
+I.   Separate build two step -> 
+        1.  agda    -> haskell (with agda compiler)
+        1.  haskell -> binary  (with ghc compiler)
+II.  Replace ghc to microhs 
+III. Build to kos
+IV.  Run :)
+
+And plan B:
+We can haskell to agda project
+
+Let's try plan A
+
+Ok. the firts step it is not so hard:
+
+```
+MAlonzo: AgdaHello.agda
+	agda  -i. --ghc-dont-call-ghc --compile --library=standard-library-2.2 AgdaHello.agda
+```
+
+It prints logs:
+
+```
+agda  -i. --ghc-dont-call-ghc --compile --library=standard-library-2.2 AgdaHello.agda
+Compiling Agda.Primitive in /usr/share/libghc-agda-dev/lib/prim/Agda/Primitive.agdai to ~/github/rb-kos-research/agda-hello/MAlonzo/Code/Agda/Primitive.hs
+<---CUT--->
+NOT calling: ghc -O -o ~/dev/github/rb-kos-research/agda-hello/AgdaHello -Werror -i~/github/rb-kos-research/agda-hello -main-is MAlonzo.Code.AgdaHello ~/github/rb-kos-research/agda-hello/MAlonzo/Code/AgdaHello.hs --make -fwarn-incomplete-patterns
+
+```
+Just copy last line
+
+```
+Hello: MAlonzo
+	ghc -O -o Hello \
+		-Werror -i. \
+		-main-is MAlonzo.Code.AgdaHello \
+		MAlonzo/Code/AgdaHello.hs \
+		--make -fwarn-incomplete-patterns
+
+
+```
+
 # 32
 Ok. Let's start play with agda.
 https://agda.readthedocs.io/en/v2.6.0.1/getting-started/hello-world.html

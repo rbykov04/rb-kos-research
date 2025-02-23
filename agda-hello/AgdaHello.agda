@@ -1,4 +1,4 @@
-module agda-hello where
+module AgdaHello where
 
 open import Agda.Builtin.IO using (IO)
 open import Agda.Builtin.Unit using (⊤)

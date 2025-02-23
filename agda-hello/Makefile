@@ -1,16 +1,27 @@
 .PHONY: run distclean
 
-run: agda-hello
-	./agda-hello
+run: Hello
+	./Hello
 
 
-agda-hello: agda-hello.agda
-	agda  -i.  --compile --library=standard-library-2.2 agda-hello.agda
+
+Hello: MAlonzo
+	ghc -O -o Hello \
+		-Werror -i. \
+		-main-is MAlonzo.Code.AgdaHello \
+		MAlonzo/Code/AgdaHello.hs \
+		--make -fwarn-incomplete-patterns
+
+
+
+
+MAlonzo: AgdaHello.agda
+	agda  -i. --ghc-dont-call-ghc --compile --library=standard-library-2.2 AgdaHello.agda
 
 clean:
 	rm -rf _build
 	rm -rf MAlonzo
-	rm -f agda-hello
+	rm -f Hello
 
 distclean:
 	rm -rf agda-stdlib
