@@ -6,6 +6,7 @@ run: Hello
 MHSDIR=MicroHs
 BIN=MicroHs/bin
 LIB=MicroHs/lib
+HUGS=MicroHs/hugs
 TOOLS=MicroHs/Tools
 RUNTIME=MicroHs/src/runtime
 
@@ -43,10 +44,12 @@ MicroHs:
 
 
 Hello: MAlonzo
-	 MHSDIR=$(MHSDIR) $(BIN)/gmhs \
+	cp RTE.hs MAlonzo/RTE.hs
+	MHSDIR=$(MHSDIR) $(BIN)/gmhs \
 		MAlonzo.Code.AgdaHello \
 		-i$(LIB)  \
 		-oHello
+
 
 
 

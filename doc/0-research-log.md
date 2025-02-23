@@ -1,4 +1,75 @@
 
+# 35
+Continue to run agda with microhs
+
+## Problem 1
+```
+module MAlonzo.RTE where
+...
+
+-- Support for musical coinduction.
+
+data Inf                   a = Sharp { flat :: a }
+type Infinity (level :: *) a = Inf a
+```
+
+```
+MHSDIR=MicroHs MicroHs/bin/gmhs \
+	MAlonzo.Code.AgdaHello \
+	-iMicroHs/lib  \
+	-oHello
+gmhs: "./MAlonzo/RTE.hs": line 113, col 25:
+  found:    *
+  expected: forall ∀ LQIdent ( UQIdent [ literal
+```
+
+I have a few questions:
+- What is "musical coinduction?"
+- What does (level :: *) mean?
+- How does fix this?
+
+
+
+## Problem 2
+```
+
+module MAlonzo.RTE where
+...
+import qualified GHC.Exts as GHC (Any)
+
+```
+
+```
+gmhs: "./MAlonzo/RTE.hs": line 6, col 18: Module not found: GHC.Exts
+search path=[".","MicroHs/lib","MicroHs/lib"]
+package path=[]
+CallStack (from HasCallStack):
+  error, called at src/MicroHs/Expr.hs:738:24 in main:MicroHs.Expr
+  errorMessage, called at src/MicroHs/Compile.hs:415:7 in main:MicroHs.Compile
+```
+
+Ok. I did this.
+I build this with microHs.
+
+Thera are 3 problems:
+```
+--FIXME: Pronlem 1
+--import qualified GHC.Exts as GHC (Any)
+data Any
+
+--FIXME: Pronlem 2 what is generalCategory
+--natToChar :: Integer -> Char
+--natToChar n | generalCategory c == Surrogate = '\xFFFD'
+--            | otherwise                      = c
+--  where c = toEnum $ fromIntegral $ mod n 0x110000
+
+--FIXME: Pronlem 3 what to do with * vs forall ?
+--type Infinity (level :: *) a = Inf a
+```
+
+Let's leave this for future
+
+
 # 34
 Progress:
 I.   Separate build two step - DONE
