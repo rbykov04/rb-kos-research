@@ -27,3 +27,14 @@ agda-hello/_build
 agda-hello/MAlonzo
 agda-hello/.mhsi
 agda-hello/MicroHs
+agda-hello/Addcombs
+agda-hello/Einit.edl
+agda-hello/Hello-opt.comb
+agda-hello/Hello.c
+agda-hello/Hello.comb
+agda-hello/Hello.edl
+agda-hello/Init
+agda-hello/kos-qemu-image*
+agda-hello/ksm.module
+agda-hello/security.psl
+agda-hello/security.psl.c

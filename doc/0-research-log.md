@@ -1,3 +1,39 @@
+# 36
+Progress:
+I.   Separate build two step - DONE
+II.  Replace ghc to microhs  - DON
+III. Build to kos
+IV.  Run :)
+
+Let's build to kos
+
+This is not so hard.
+
+
+```
+[ROFS ] Files: 3, size: 2195456 (0x00218000).
+[ROFS ] File #00: einit            - size:   939664 (0x000e5690)
+[ROFS ] File #01: Hello            - size:  1163992 (0x0011c2d8)
+[ROFS ] File #02: ksm.module       - size:    78024 (0x000130c8)
+[VMM  ] Virtual Memory Manager service initialized.
+[IO   ] I/O subsystem successfully initialized.
+[FS   ] File System Manager successfully initialized.
+[CM   ] Connection Manager successfully initialized.
+[KSM  ] Module: 'ksm.module' loaded.
+[KSM  ] Audit log created.
+[KSM  ] Module: 'ksm.module' initialized.
+[KSM  ] Server: 'kl.core.Core' executed.
+[KSM  ] Security system successfully initialized.
+[INIT ] Starting 'Einit' ...
+[INIT ] Starting system worker.
+[2025-02-23T15:16:20.069][Info][Einit][11:11][CRT0] VFS filesystem and network backends initialized with stub (related calls will return EIO)
+[2025-02-23T15:16:20.166][Info][Hello][12:12][CRT0] VFS filesystem and network backends initialized with stub (related calls will return EIO)
+Hello world form Agda! 
+
+[INIT ] System worker finished
+[INIT ] System halted...
+System halted
+```
 
 # 35
 Continue to run agda with microhs

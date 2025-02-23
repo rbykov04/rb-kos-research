@@ -6,7 +6,8 @@ open import Agda.Builtin.String using (String)
 
 postulate putStrLn : String → IO ⊤
 {-# FOREIGN GHC import qualified Data.Text as T #-}
-{-# COMPILE GHC putStrLn = putStrLn . T.unpack #-}
+{-# FOREIGN GHC import qualified System.IO as SIO #-}
+{-# COMPILE GHC putStrLn = (SIO.hPutStrLn SIO.stderr) . T.unpack #-}
 
 main : IO ⊤
 main = putStrLn "Hello world form Agda! \n"
