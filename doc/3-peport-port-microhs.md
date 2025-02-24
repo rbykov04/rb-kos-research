@@ -14,7 +14,7 @@ What our plan was:
 
 Let's see result.
 
-## Proect
+## Project
 ```
  ~/dev/github/rb-kos-research/microhs   main ●  ls -1
 config-kos-64.h

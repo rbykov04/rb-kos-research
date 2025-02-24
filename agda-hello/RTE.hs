@@ -3,7 +3,7 @@
 module MAlonzo.RTE where
 
 import Unsafe.Coerce
---FIXME: Pronlem 1
+--FIXME: Problem 1
 --import qualified GHC.Exts as GHC (Any)
 data Any
 
@@ -68,7 +68,7 @@ remInt = rem
 -- #4999: Data.Text maps surrogate code points (\xD800 - \xDFFF) to the replacement character
 -- \xFFFD, so to keep strings isomorphic to list of characters we do the same for characters.
 
---FIXME: Pronlem 2 what is generalCategory
+--FIXME: Problem 2 what is generalCategory
 --natToChar :: Integer -> Char
 --natToChar n | generalCategory c == Surrogate = '\xFFFD'
 --            | otherwise                      = c
@@ -116,5 +116,5 @@ lt64 = (<)
 
 data Inf                   a = Sharp { flat :: a }
 
---FIXME: Pronlem 3 what to do with * vs forall ?
+--FIXME: Problem 3 what to do with * vs forall ?
 --type Infinity (level :: *) a = Inf a

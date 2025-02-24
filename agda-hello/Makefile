@@ -125,7 +125,7 @@ Hello.c: Hello-opt.comb Addcombs
 Hello-opt.comb: Hello.comb
 	$(BIN)/mhseval +RTS -rHello.comb -oHello-opt.comb
 
-Hello.comb: MAlonzo
+Hello.comb: MAlonzo MicroHs Addcombs
 	cp RTE.hs MAlonzo/RTE.hs
 	MHSDIR=$(MHSDIR) $(BIN)/gmhs \
 		MAlonzo.Code.AgdaHello \
@@ -170,6 +170,21 @@ clean:
 	rm -f HelloGhc
 	rm -f HelloHost
 	rm -f Addcombs
+	rm -f kos-qemu-image*
+	rm -f Init
+	rm -f Hello
+	rm -f Hello.c
+	rm -f *.agdai
+	rm -f .mhsi
+	rm -f Hello.comb
+	rm -f Hello-opt.comb
+	rm -f HelloHost
+	rm -f Addcombs
+	rm -f ksm.module
+	rm -f security.psl.c
+
+
+
 
 distclean:
 	rm -rf MicroHs

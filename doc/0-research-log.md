@@ -89,17 +89,17 @@ I build this with microHs.
 
 Thera are 3 problems:
 ```
---FIXME: Pronlem 1
+--FIXME: Problem 1
 --import qualified GHC.Exts as GHC (Any)
 data Any
 
---FIXME: Pronlem 2 what is generalCategory
+--FIXME: Problem 2 what is generalCategory
 --natToChar :: Integer -> Char
 --natToChar n | generalCategory c == Surrogate = '\xFFFD'
 --            | otherwise                      = c
 --  where c = toEnum $ fromIntegral $ mod n 0x110000
 
---FIXME: Pronlem 3 what to do with * vs forall ?
+--FIXME: Problem 3 what to do with * vs forall ?
 --type Infinity (level :: *) a = Inf a
 ```
 
