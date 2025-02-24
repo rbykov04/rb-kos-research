@@ -1,14 +1,14 @@
 # Let's play with KasperskyOs
 
-Where can I get SDK?
-here: https://os.kaspersky.ru/download-community-edition/
+- Q: Where can I get SDK?
+- A: here: https://os.kaspersky.ru/download-community-edition/
 
-What here:
+What is here:
 
-doc        - I write here report and log
-hello      - Example how to run hello.c on KasperskyOs pure make (without any cmake)
-microhs    - Example how to run haskell on KasperskyOs
-agda-hello - Example how to run agda    on KasperskyOs
+1. doc        - I write here report and log
+1. hello      - Example how to run hello.c on KasperskyOs pure make (without any cmake)
+1. microhs    - Example how to run haskell on KasperskyOs
+1. agda-hello - Example how to run agda    on KasperskyOs
 
 
 
