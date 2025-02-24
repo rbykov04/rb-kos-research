@@ -263,7 +263,7 @@ Then build microhs (part3)
 MHSDIR=MicroHs MicroHs/bin/gmhs -iMicroHs/Tools Addcombs -oAddcombs
 ```
 
-Path RTE.hs and and compile haskell with microhs
+Patch RTE.hs and and compile haskell with microhs
 
 ```
 cp RTE.hs MAlonzo/RTE.hs
@@ -283,7 +283,6 @@ MicroHs/bin/mhseval +RTS -rHello.comb -oHello-opt.comb
 ./Addcombs Hello-opt.comb Hello.c
 ```
 
-And then use magic to build Hello and Kaspersky Os Magic.
 
 Prepare Hello binary
 ```
@@ -302,7 +301,7 @@ Prepare Init binary
 ```
 
 
-Prepare ksm.module (security modele for kernel)
+Prepare ksm.module (security module for kernel)
 ```
 "/opt/KasperskyOS-Community-Edition-RaspberryPi4b-1.3.0.166"/toolchain/bin/nk-psl-gen-c \
 	security.psl \
@@ -469,12 +468,15 @@ And "Hello world from Agda" printed
 
 ## Discussion
 
-What can we do better?
+What do next?
+
 1. We need research perfomance microhs (we need time to wait output)
 2. We need custom RTE.hs (What should we do here?)
-3. It time to make smt usefull.
+3. It's time to make smt usefull.
 
 
 ## Conclusion
+
 We want to run agda and we did this. 
+
 Thank you!
