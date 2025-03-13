@@ -17,7 +17,7 @@ run: build/kos-qemu-image
 build:
 	mkdir build
 
-build/Server: build server.c
+build/Server: build server.c build/Server.edl.h
 	${CC} server.c -o build/Server
 
 build/Client: build client.c
