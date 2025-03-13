@@ -1,12 +1,4 @@
-.PHONY: run distclean
-
-MHSDIR=MicroHs
-BIN=MicroHs/bin
-LIB=MicroHs/lib
-HUGS=MicroHs/hugs
-TOOLS=MicroHs/Tools
-RUNTIME=MicroHs/src/runtime
-
+.PHONY: clean run
 
 BUILD=build
 TARGET     ="aarch64-kos"
@@ -21,6 +13,12 @@ QEMU_FLAGS    +=-monitor none -nic none
 
 run: kos-qemu-image
 	${SDK}/toolchain/bin/qemu-system-aarch64 ${QEMU_FLAGS} -kernel kos-qemu-image
+
+Server: server.c
+	${CC} server.c -o Server
+
+Client: client.c
+	${CC} client.c -o Client
 
 INIT_FLAGS = --target=aarch64-kos -static -no-pie
 Init: init.c
@@ -77,7 +75,7 @@ SECURITY_MODULE_FLAGS = -fno-pic \
 ksm.module: security.psl.c
 	${CC} ${SECURITY_MODULE_FLAGS} security.psl.c -o ksm.module
 
-kos-qemu-image: Hello Init ksm.module
+kos-qemu-image: Client Server Init ksm.module
 	${SDK}/toolchain/bin/kos_make_kimg \
 	--target=aarch64-kos \
 	--with-extra-ldflags=-no-pie \
@@ -89,102 +87,14 @@ kos-qemu-image: Hello Init ksm.module
     --img-dst=kos-qemu-image \
     --max-filesize= \
     --with-init=Init \
-    Hello \
+    Client \
+    Server \
     ksm.module
 
-
-
-Hello: Hello.c
-	${CC} \
-		ffi.c \
-		Hello.c \
-		eval-kos-64.c \
-		-static \
-		-o Hello
-
-runHost: HelloHost
-	./HelloHost
-
-
-
-
-HelloHost: Hello.c
-	clang \
-		ffi.c \
-		Hello.c \
-		${RUNTIME}/eval-unix-64.c \
-		-lm\
-		-static \
-		-o HelloHost
-
-
-
-Hello.c: Hello-opt.comb Addcombs
-	./Addcombs Hello-opt.comb Hello.c
-
-Hello-opt.comb: Hello.comb
-	$(BIN)/mhseval +RTS -rHello.comb -oHello-opt.comb
-
-Hello.comb: MAlonzo MicroHs Addcombs
-	cp RTE.hs MAlonzo/RTE.hs
-	MHSDIR=$(MHSDIR) $(BIN)/gmhs \
-		MAlonzo.Code.AgdaHello \
-		-i$(LIB)  \
-		-oHello.comb
-
-
-
-
-Addcombs: MicroHs
-	MHSDIR=$(MHSDIR) $(BIN)/gmhs -i$(TOOLS) Addcombs -oAddcombs
-
-
-
-MicroHs:
-	git clone https://github.com/augustss/MicroHs
-	cd MicroHs && make bin/mhseval
-	cd MicroHs && make bin/gmhs
-
-
-
-
-
-HelloGhc: MAlonzo
-	ghc -O -o Hello \
-		-Werror -i. \
-		-main-is MAlonzo.Code.AgdaHello \
-		MAlonzo/Code/AgdaHello.hs \
-		--make -fwarn-incomplete-patterns
-
-
-
-
-
-уAlonzo: AgdaHello.agda
-	agda  -i. --ghc-dont-call-ghc --compile --library=standard-library-2.2 AgdaHello.agda
-
 clean:
-	rm -rf _build
-	rm -rf MAlonzo
-	rm -f Hello
-	rm -f HelloGhc
-	rm -f HelloHost
-	rm -f Addcombs
 	rm -f kos-qemu-image*
 	rm -f Init
-	rm -f Hello
-	rm -f Hello.c
-	rm -f *.agdai
-	rm -f .mhsi
-	rm -f Hello.comb
-	rm -f Hello-opt.comb
-	rm -f HelloHost
-	rm -f Addcombs
+	rm -f Server
+	rm -f Client
 	rm -f ksm.module
 	rm -f security.psl.c
-
-
-
-
-distclean:
-	rm -rf MicroHs
