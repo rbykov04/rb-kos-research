@@ -7,7 +7,50 @@ Plan:
 
 We need to create Echo.idl.c. It is a helper for us to use IDL inside out Server.c
 
-Let's do
+Let's do.
+
+We need compiler from idl to c.
+Let's watch some in SDK
+
+```
+
+ls -la /opt/KasperskyOS-Community-Edition-RaspberryPi4b-1.3.0.166/toolchain/bin | grep nk
+-rwxr-xr-x  1 root root   200608 янв 29 12:13 clang-linker-wrapper
+lrwxrwxrwx  1 root root        3 янв 29 11:20 lld-link -> lld
+-rwxr-xr-x  1 root root 29354704 янв 29 11:34 nk-driver
+-rwxr-xr-x  1 root root 25725520 янв 29 11:34 nk-gen-c  <---------- This one
+-rwxr-xr-x  1 root root 31527888 янв 29 11:34 nk-gen-syzlang
+-rwxr-xr-x  1 root root   605632 янв 29 12:13 nkppmeta
+-rwxr-xr-x  1 root root 51029392 янв 29 11:34 nk-psl-gen-c
+-rwxr-xr-x  1 root root 37141840 янв 29 11:34 nk-psl-gen-fuzzer
+
+```
+
+```
+/opt/KasperskyOS-Community-Edition-RaspberryPi4b-1.3.0.166/toolchain/bin/nk-gen-c    
+Missing: <xdl-file>
+
+Usage: nk-gen-c <xdl-file> [-I <search-dir>] [-o <output-dir>] 
+                [--types | --interface | --endpoints | --component-refl | 
+                  --client | --server | --tests] 
+                [--trace-client-ipc <feature>[,<feature>...]] 
+                [--trace-server-ipc <feature>[,<feature>...]] 
+                [--ipc-trace-method-filter <method>[,<method>...]] 
+                [--deprecated-no-extended-errors] [--extended-errors] [-W FLAGS]
+                [--log-level <level>]
+
+  Generate C stubs for a given IDL/CDL/EDL file
+```
+
+Eeeee. Let's play
+```
+ls -la build | grep Server
+-rwxrwxr-x 1 rbykov rbykov  938216 мар 13 14:45 Server
+-rw-rw-r-- 1 rbykov rbykov   11840 мар 13 15:37 Server.edl.h
+-rw-rw-r-- 1 rbykov rbykov     268 мар 13 15:37 Server.edl.nk.d
+```
+
+
 
 # 39
 Let's introduce some method for server.

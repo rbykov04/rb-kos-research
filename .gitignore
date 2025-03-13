@@ -41,10 +41,3 @@ agda-hello/security.psl.c
 
 
 echo/build/*
-echo/Server
-echo/Client
-echo/Hello
-echo/Init
-echo/ksm.module
-echo/kos-qemu-image*
-echo/security.psl.c

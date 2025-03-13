@@ -23,6 +23,20 @@ build/Server: build server.c
 build/Client: build client.c
 	${CC} client.c -o build/Client
 
+ROOT_DIR            :=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+#NK_GEN_FLAGS        = -P${SDK}/sysroot-aarch64-kos/include/system.platform
+NK_GEN_FLAGS       += -I${SDK}/sysroot-aarch64-kos/include
+NK_GEN_FLAGS       += -I${SDK}/toolchain/include
+NK_GEN_FLAGS       += -I${ROOT_DIR}
+
+
+
+build/Server.edl.h: Server.edl Echo.idl
+	${SDK}/toolchain/bin/nk-gen-c \
+		Server.edl \
+		${NK_GEN_FLAGS} \
+	-o build
+
 INIT_FLAGS = --target=aarch64-kos -static -no-pie
 build/Init: build init.c
 	${CC} ${INIT_FLAGS} init.c -o build/Init
