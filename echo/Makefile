@@ -11,18 +11,21 @@ QEMU_FLAGS    =-m 2048 -machine vexpress-a15,secure=on -cpu cortex-a72
 QEMU_FLAGS    +=--nographic -smp 4 -serial stdio -nographic
 QEMU_FLAGS    +=-monitor none -nic none
 
-run: kos-qemu-image
-	${SDK}/toolchain/bin/qemu-system-aarch64 ${QEMU_FLAGS} -kernel kos-qemu-image
+run: build/kos-qemu-image
+	${SDK}/toolchain/bin/qemu-system-aarch64 ${QEMU_FLAGS} -kernel build/kos-qemu-image
 
-Server: server.c
-	${CC} server.c -o Server
+build:
+	mkdir build
 
-Client: client.c
-	${CC} client.c -o Client
+build/Server: build server.c
+	${CC} server.c -o build/Server
+
+build/Client: build client.c
+	${CC} client.c -o build/Client
 
 INIT_FLAGS = --target=aarch64-kos -static -no-pie
-Init: init.c
-	${CC} ${INIT_FLAGS} init.c -o Init
+build/Init: build init.c
+	${CC} ${INIT_FLAGS} init.c -o build/Init
 
 ROOT_DIR            :=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 PSL_GEN_FLAGS        = -P${SDK}/sysroot-aarch64-kos/include/system.platform
@@ -30,11 +33,11 @@ PSL_GEN_FLAGS       += -I${SDK}/sysroot-aarch64-kos/include
 PSL_GEN_FLAGS       += -I${SDK}/toolchain/include
 PSL_GEN_FLAGS       += -I${ROOT_DIR}
 
-security.psl.c: security.psl
+build/security.psl.c: build security.psl
 	${SDK}/toolchain/bin/nk-psl-gen-c \
 		security.psl \
 		${PSL_GEN_FLAGS} \
-		-o security.psl.c
+		-o build/security.psl.c
 
 SECURITY_MODULE_FLAGS = -fno-pic \
 						-D__KOS_KERNEL__ \
@@ -72,10 +75,11 @@ SECURITY_MODULE_FLAGS = -fno-pic \
 						-L/${SDK}/toolchain/lib/clang/17/lib/kos \
 						-lclang_rt.builtins-aarch64
 
-ksm.module: security.psl.c
-	${CC} ${SECURITY_MODULE_FLAGS} security.psl.c -o ksm.module
+build/ksm.module: build/security.psl.c
+	${CC} ${SECURITY_MODULE_FLAGS} build/security.psl.c -o build/ksm.module
 
-kos-qemu-image: Client Server Init ksm.module
+build/kos-qemu-image: build/Client build/Server build/Init build/ksm.module
+	cd build && \
 	${SDK}/toolchain/bin/kos_make_kimg \
 	--target=aarch64-kos \
 	--with-extra-ldflags=-no-pie \
@@ -92,9 +96,4 @@ kos-qemu-image: Client Server Init ksm.module
     ksm.module
 
 clean:
-	rm -f kos-qemu-image*
-	rm -f Init
-	rm -f Server
-	rm -f Client
-	rm -f ksm.module
-	rm -f security.psl.c
+	rm -rf build

@@ -1,5 +1,125 @@
+# 40
+Plan:
+1. Introduce Echo.idl  - DONE
+2. Create Echo.idl.c file for use IPC with IDL
+3. Upgrade Server
+4. Upgrade Client
+
+We need to create Echo.idl.c. It is a helper for us to use IDL inside out Server.c
+
+Let's do
+
+# 39
+Let's introduce some method for server.
+
+Client ---(Echo msg)-> Server
+Server -> print msg to stderr.
+
+To make this wi will use IPC.
+
+Plan:
+1. Introduce Echo.idl 
+2. Create Echo.idl.c file for use IPC with IDL
+3. Upgrade Server
+4. Upgrade Client
+
+Ok
+```
+cat Echo.idl 
+package Echo
+
+interface {
+    Echo(in string<256> value);
+}
+```
+
+Then we add this to Server.edl (To exaplain ksm module we will use this in server)
+```
+cat Server.edl
+task class Server
+
+endpoints {
+    main : Echo
+}
+```
+
+We can even see what new will be in security.psl.c
+
+At least this:
+```
+      case 2:
+        {
+            switch (iid) {
+                
+              case 0:
+                {
+                    *endpoint_name = "main";
+                    *interface_name = "Echo";
+                    switch (mid) {
+                        
+                      case 0:
+                        {
+                            *method_name = "Echo";
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+```
+
+
+# 38
+The more source files the more bin files we create
+
+Le't introduce build dir and will create bin files there
+
+Done:
+tree  
+.
+├── build
+│   ├── Client
+│   ├── Init
+│   ├── kos-qemu-image
+│   ├── kos-qemu-image.bin
+│   ├── kos-qemu-image.dtb
+│   ├── kos-qemu-image.map
+│   ├── kos-qemu-image.romfs
+│   ├── kos-qemu-image.stripped
+│   ├── ksm.module
+│   ├── security.psl.c
+│   └── Server
+├── client.c
+├── Client.edl
+├── Einit.edl
+├── init.c
+├── Makefile
+├── security.psl
+├── server.c
+└── Server.edl
+
+
+
 # 37
 Let's upgrade example hello and add another process.
+
+```
+ ~/dev/github/rb-kos-research/echo   main  ls -la
+total 40
+drwxrwxr-x 2 rbykov rbykov 4096 мар 13 14:13 .
+drwxrwxr-x 8 rbykov rbykov 4096 мар 13 13:53 ..
+-rw-rw-r-- 1 rbykov rbykov  122 мар 13 13:58 client.c
+-rw-rw-r-- 1 rbykov rbykov   18 мар 13 14:01 Client.edl
+-rw-rw-r-- 1 rbykov rbykov   13 фев 22 12:16 Einit.edl
+-rw-rw-r-- 1 rbykov rbykov 1590 мар 13 14:09 init.c
+-rw-rw-r-- 1 rbykov rbykov 2840 мар 13 14:00 Makefile
+-rw-rw-r-- 1 rbykov rbykov  303 мар 13 14:02 security.psl
+-rw-rw-r-- 1 rbykov rbykov  122 мар 13 13:58 server.c
+-rw-rw-r-- 1 rbykov rbykov   18 мар 13 14:02 Server.edl
+
+```
 
 # 36
 Progress:
