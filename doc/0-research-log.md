@@ -91,7 +91,34 @@ nk_transport_recv error
 nk_transport_reply error
 ```
 
+Les's check
+```
+Handle handle = ServiceLocatorRegister("server_connection", NULL, 0, &iid);
+assert(handle != INVALID_HANDLE);
+```
 
+And yes:
+
+```
+assertion "handle != INVALID_HANDLE" failed: file "server.c", line 24, function: main
+
+==============================================================================
+
+Unhandled Common Exception
+ESR = 0xf2000001
+EC = 0x3c
+Exception class: BRK instruction execution in AArch64 state
+    EIID : Server
+    Name : Server
+    Path : Server
+    TID  : 12
+    pc   : 0x19d517524
+    CPU  : 00
+
+
+```
+
+It means: We need set up our system a little bit to register server_connections
 
 # 40
 Plan:

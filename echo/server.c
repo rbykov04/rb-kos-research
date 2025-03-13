@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include <coresrv/nk/transport-kos.h>
 #include <coresrv/sl/sl_api.h>
@@ -20,18 +21,19 @@ int main(void)
 {
     ServiceId iid;
     Handle handle = ServiceLocatorRegister("server_connection", NULL, 0, &iid);
+    assert(handle != INVALID_HANDLE);
 
     NkKosTransport transport;
     NkKosTransport_Init(&transport, handle, NK_NULL, 0);
 
 
-    Server_entity_req req;
-    char req_buffer[Server_entity_req_arena_size];
+    Server_entity_req req = {0};
+    char req_buffer[Server_entity_req_arena_size] = {};
     struct nk_arena req_arena = NK_ARENA_INITIALIZER(req_buffer,
                                         req_buffer + sizeof(req_buffer));
 
-    Server_entity_res res;
-    char res_buffer[Server_entity_res_arena_size];
+    Server_entity_res res = {0};
+    char res_buffer[Server_entity_res_arena_size] = {};
     struct nk_arena res_arena = NK_ARENA_INITIALIZER(res_buffer,
                                         res_buffer + sizeof(res_buffer));
 
@@ -52,8 +54,11 @@ int main(void)
         nk_arena_reset(&res_arena);
 
         /* Wait for a request for the server program. */
-        if (nk_transport_recv(&transport.base, &req.base_, &req_arena) != NK_EOK) {
-            fprintf(stderr, "nk_transport_recv error\n");
+
+
+        nk_err_t ret = nk_transport_recv(&transport.base, &req.base_, &req_arena);
+        if (ret  != NK_EOK ) {
+            fprintf(stderr, "nk_transport_recv error: %d\n", ret);
         } else {
             Server_entity_dispatch(&entity, &req.base_, &req_arena,
                                         &res.base_, &res_arena);
