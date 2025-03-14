@@ -1,3 +1,73 @@
+# 44
+Plan:
+1. Introduce Echo.idl  - DONE
+2. Create Echo.idl.c file for use IPC with IDL -DONE
+3. Upgrade Server - DONE
+3. Solve problem with init -DONE
+4. Upgrade Client - DONE
+
+But Let's umpack ipc of client.
+FROM:
+```
+
+    struct Echo_proxy proxy;
+    Echo_proxy_init(&proxy, &transport.base, riid);
+```
+TO
+```
+  struct Echo_proxy proxy = {
+        .base = {},
+        .transport = &transport.base,
+        .iid = riid
+    };
+```
+
+From:
+```
+    nk_err_t ret = Echo_Echo(&proxy.base, &req, &reqArena, &res, NULL);
+```
+ 
+TO
+```
+    nk_req_reset(&req);
+    nk_msg_set_method_id(&req, riid, Echo_Echo_mid);
+    nk_msg_set_ncaps(&req, Echo_Echo_req_handles);
+    nk_req_reset(&res);
+    nk_msg_set_method_id(&res, riid, Echo_Echo_mid);
+    nk_msg_set_ncaps(&res, Echo_Echo_res_handles);
+
+    nk_err_t rc = nk_transport_call(&transport.base
+                                   , &req.base_
+                                   , &reqArena
+                                   , &res.base_
+                                   , NULL);
+
+
+```
+
+FROM
+```
+    nk_err_t rc = nk_transport_call(&transport.base
+                                   , &req.base_
+                                   , &reqArena
+                                   , &res.base_
+                                   , NULL);
+
+```
+TO
+
+```
+    nk_err_t rc = transport.base.ops->call (&transport.base
+                                   , &req.base_
+                                   , &reqArena
+                                   , &res.base_
+                                   , NULL);
+ 
+
+```
+
+What is transport.base.ops->call?
+
 # 43
 Plan:
 1. Introduce Echo.idl  - DONE
