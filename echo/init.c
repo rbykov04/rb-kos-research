@@ -11,51 +11,75 @@ static const EntityInfo taskInfo_Client = {
     .endpoints = NK_NULL,
 };
 
+static const EndpointInfo endpointsInfo_Server_1[2] = {
+    {
+        .name = "main",
+        .riid = 0,
+        .iface_name = "Echo",
+    },
+    {
+        .name = "Server.main",
+        .riid = 0,
+        .iface_name = "Echo",
+    }
+};
+
+
 static const EntityInfo taskInfo_Server = {
     .eiid = "Server",
-    .max_endpoints = 0,
-    .endpoints = NK_NULL,
+    .max_endpoints = 2,
+    .endpoints = endpointsInfo_Server_1,
 };
 
 int main(void) {
 
     const char * taskInfo_Server_args[] = {"Server", RTL_NULL};
-    Entity *task1 = EntityInitEx(&taskInfo_Server, "Server", "Server");
+    Entity *task_Server = EntityInitEx(&taskInfo_Server, "Server", "Server");
 
-    if (!task1) {
+    if (!task_Server) {
         fprintf(stderr, "Can't initialize task \"Server\"\n");
         return EXIT_FAILURE;
     }
 
-    if (EntitySetArgs(task1, taskInfo_Server_args) != rcOk) {
+    if (EntitySetArgs(task_Server, taskInfo_Server_args) != rcOk) {
         fprintf(stderr, "Can't set args for task \"Server\"\n");
         return EXIT_FAILURE;
     }
 
-    if (EntityRun(task1) != rcOk) {
-        fprintf(stderr, "Can't run task \"Server\"\n");
-        return EXIT_FAILURE;
-    }
-
-    /*--------------------------------------------------------*/
+   /*--------------------------------------------------------*/
 
     const char * taskInfo_Client_args[] = {"Client", RTL_NULL};
-    Entity *task2 = EntityInitEx(&taskInfo_Client, "Client", "Client");
+    Entity *task_Client = EntityInitEx(&taskInfo_Client, "Client", "Client");
 
-    if (!task2) {
+    if (!task_Client) {
         fprintf(stderr, "Can't initialize task \"Client\"\n");
         return EXIT_FAILURE;
     }
 
-    if (EntitySetArgs(task2, taskInfo_Client_args) != rcOk) {
+    if (EntitySetArgs(task_Client, taskInfo_Client_args) != rcOk) {
         fprintf(stderr, "Can't set args for task \"Client\"\n");
         return EXIT_FAILURE;
     }
 
-    if (EntityRun(task2) != rcOk) {
+    /*------------------------*/
+
+    if (EntityConnectToService(task_Client, task_Server, "server_connection") != rcOk) {
+        fprintf(stderr, "Can't setup a connection %s\n", "server_connection");
+        return EXIT_FAILURE;
+    }
+
+
+    /*------------------------*/
+    if (EntityRun(task_Server) != rcOk) {
+        fprintf(stderr, "Can't run task \"Server\"\n");
+        return EXIT_FAILURE;
+    }
+
+    if (EntityRun(task_Client) != rcOk) {
         fprintf(stderr, "Can't run task \"Client\"\n");
         return EXIT_FAILURE;
     }
+
 
 
     return EXIT_SUCCESS;

@@ -1,3 +1,104 @@
+# 43
+Plan:
+1. Introduce Echo.idl  - DONE
+2. Create Echo.idl.c file for use IPC with IDL -DONE
+3. Upgrade Server - DONE
+3. Solve problem with init -DONE
+4. Upgrade Client
+
+
+Let's upgrade Client
+
+
+# 42
+Plan:
+1. Introduce Echo.idl  - DONE
+2. Create Echo.idl.c file for use IPC with IDL -DONE
+3. Upgrade Server - DONE
+3. Solve problem with init ()
+```
+
+    Handle handle = ServiceLocatorRegister("server_connection", NULL, 0, &iid);
+```
+4. Upgrade Client
+
+Ok.
+I reckon problem in init.c. What is server_connection.
+I copied this from server.c from example of SDK.
+
+Also there is init.yaml inside that example.
+```
+cat init.yaml 
+
+entities:
+
+- name: Client
+  connections:
+  - target: Server
+    id: server_connection
+
+
+- name: Server
+```
+
+Let's generate init.c and watch
+```
+/opt/KasperskyOS-Community-Edition-RaspberryPi4b-1.3.0.166/toolchain/bin/einit init.yaml -o init-etalon.c -I/opt/KasperskyOS-Community-Edition-RaspberryPi4b-1.3.0.166/sysroot-aarch64-kos/include -I.
+
+```
+Update1:
+```
+static const EndpointInfo endpointsInfo_Server_1[2] = {
+    {
+        .name = "main",
+        .riid = 0,
+        .iface_name = "Echo",
+    },
+    {
+        .name = "Server.main",
+        .riid = 0,
+        .iface_name = "Echo",
+    }
+};
+```
+
+Update2:
+```
+
+    if (EntityConnectToService(task_Client_0, task_Server_1, "server_connection") != rcOk) {
+        fprintf(stderr, "Can't setup a connection %s\n", "server_connection");
+        return EXIT_FAILURE;
+    }
+```
+
+Ok! Let's use this.
+
+Done:
+```
+[TIME ] Time infrastructure initialized.
+[ROFS ] Files: 4, size: 2977792 (0x002d7000).
+[ROFS ] File #00: einit            - size:   941912 (0x000e5f58)
+[ROFS ] File #01: Client           - size:   938216 (0x000e50e8)
+[ROFS ] File #02: Server           - size:  1004464 (0x000f53b0)
+[ROFS ] File #03: ksm.module       - size:    78120 (0x00013128)
+[VMM  ] Virtual Memory Manager service initialized.
+[IO   ] I/O subsystem successfully initialized.
+[FS   ] File System Manager successfully initialized.
+[CM   ] Connection Manager successfully initialized.
+[KSM  ] Module: 'ksm.module' loaded.
+[KSM  ] Audit log created.
+[KSM  ] Module: 'ksm.module' initialized.
+[KSM  ] Server: 'kl.core.Core' executed.
+[KSM  ] Security system successfully initialized.
+[INIT ] Starting 'Einit' ...
+[INIT ] Starting system worker.
+[2025-03-14T07:19:34.072][Info][Einit][11:11][CRT0] VFS filesystem and network backends initialized with stub (related calls will return EIO)
+[2025-03-14T07:19:34.208][Info][Server][12:12][CRT0] VFS filesystem and network backends initialized with stub (related calls will return EIO)
+[2025-03-14T07:19:34.211][Info][Client][13:13][CRT0] VFS filesystem and network backends initialized with stub (related calls will return EIO)
+Hello I'm server
+I am Client!
+```
+
 # 41
 Plan:
 1. Introduce Echo.idl  - DONE
@@ -6,6 +107,7 @@ Plan:
 4. Upgrade Client
 
 Ok. Let's upgrade server
+
 
 Done:
 ```
