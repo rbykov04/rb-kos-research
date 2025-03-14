@@ -16,7 +16,9 @@
 
 #include <assert.h>
 
-void hello(int)
+#define MESSAGE_SIZE 100
+
+int sendToHello(const char * message, int size)
 {
     Handle handle = ServiceLocatorConnect("server_connection");
     assert(handle != INVALID_HANDLE);
@@ -33,13 +35,15 @@ void hello(int)
     struct nk_arena reqArena = NK_ARENA_INITIALIZER(
                                 reqBuffer, reqBuffer + sizeof(reqBuffer));
 
-    #define MESSAGE_SIZE 100
-    nk_char_t message[MESSAGE_SIZE] = "Hello from Haskell-client to server !";
+    assert (size < MESSAGE_SIZE-1);
+    char buf[MESSAGE_SIZE] = {};
+    strncpy(buf, message, size);
+    buf[size+1] = 0;
     nk_arena_store(nk_char_t
                   , &reqArena
                   , &(req.value)
-                  , message
-                  , MESSAGE_SIZE);
+                  , buf
+                  , size + 1);
 
 
     nk_req_reset(&req);
@@ -60,10 +64,13 @@ void hello(int)
         rtl_printf("Operation has failed with rc = "RETCODE_HR_FMT"\n", RETCODE_HR_PARAMS(rc));
     }
 
-   // return EXIT_SUCCESS;
-    return;
+    return EXIT_SUCCESS;
 }
 
+void hello(int s)
+{
+    mhs_from_Int(s, 2, sendToHello(mhs_to_Ptr(s, 0), mhs_to_Int(s, 1)));
+}
 
 static struct ffi_entry table[] = {
 { "hello", hello},
