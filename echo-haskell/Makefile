@@ -131,7 +131,7 @@ build/kos-qemu-image: build/Client build/Server build/Init build/ksm.module Hell
 runHost: HelloHost
 	./HelloHost
 
-Hello: Hello.c
+Hello: Hello.c ffi.c
 	${CC} \
 		ffi.c \
 		Hello.c \

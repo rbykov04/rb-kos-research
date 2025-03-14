@@ -18,9 +18,11 @@
 
 #define MESSAGE_SIZE 100
 
-int sendToHello(const char * message, int size)
+int sendToHello( const char *connection
+               , const char *message
+               , int size)
 {
-    Handle handle = ServiceLocatorConnect("server_connection");
+    Handle handle = ServiceLocatorConnect(connection);
     assert(handle != INVALID_HANDLE);
 
     nk_iid_t riid = ServiceLocatorGetRiid(handle, "Server.main");
@@ -69,7 +71,9 @@ int sendToHello(const char * message, int size)
 
 void hello(int s)
 {
-    mhs_from_Int(s, 2, sendToHello(mhs_to_Ptr(s, 0), mhs_to_Int(s, 1)));
+    mhs_from_Int(s, 3, sendToHello( mhs_to_Ptr(s, 0)    // connection
+                                  , mhs_to_Ptr(s, 1)    // text
+                                  , mhs_to_Int(s, 2))); // size
 }
 
 static struct ffi_entry table[] = {
