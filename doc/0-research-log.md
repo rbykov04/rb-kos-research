@@ -1,3 +1,147 @@
+# 45
+We need unpack nk_transport_call_fn
+I expec there is special syscall.
+Let's find
+```
+sysroot-aarch64-kos/include/coresrv  cat syscalls.h 
+
+/**
+ * Performs blocking rendezvous-style call.
+ *
+ * This call is synchronous and is blocked till server sends reply.
+ *
+ * @param[in]       handle  Client IPC handle on which call is made
+ * @param[in]       msgOut  Output message descriptor
+ * @param[in, out]  msgIn   Input (reply) message descriptor
+ *
+ * @return                  Return code
+ */
+Retcode Call(Handle handle, const SMsgHdr *msgOut, SMsgHdr *msgIn);
+
+/**
+ * Performs blocking rendezvous-style call with timeout.
+ *
+ * This call is synchronous and is blocked till server sends reply
+ * or specified timeout expired.
+ *
+ * @param[in]       handle      Client IPC handle on which call is made
+ * @param[in]       msgOut      Output message descriptor
+ * @param[in, out]  msgIn       Input (reply) message descriptor
+ * @param[in]       mdelay      timeout delay in milliseconds (CallEx version)
+ * @param[in]       syncHandle  IPC sync object handle or INVALID_HANDLE
+ *                              if the sync object is not used
+ *
+ * @return                      Return code
+ */
+Retcode CallEx(Handle handle, const SMsgHdr *msgOut, SMsgHdr *msgIn,
+               rtl_uint32_t mdelay, Handle syncHandle);
+
+
+
+```
+
+Let's use simple one.
+```
+Retcode Call(Handle handle, const SMsgHdr *msgOut, SMsgHdr *msgIn);
+```
+
+We need 3 args.
+I guess the first one we have.
+But how to build 2 and 3?
+
+```
+ /opt/KasperskyOS-Community-Edition-RaspberryPi4b-1.3.0.166/sysroot-aarch64-kos/include  cat ipc/if_rend.h 
+/**
+ * @file
+ * @brief KasperskyOS Interprocess Communication (IPC) API.
+ *
+ * @copyright
+ *   Copyright 2018 AO Kaspersky Lab
+ *   Registered trademarks and service marks are the property of their
+ *   respective owners.
+ */
+
+#ifndef CORE_IPC_IF_REND_H
+#define CORE_IPC_IF_REND_H
+#pragma once
+
+#include <rtl/compiler.h>
+#include <rtl/stdint.h>
+#include <rtl/retcode.h>
+
+#include <handle/handletype.h>
+#include <task/pidtype.h>
+#include <thread/tidtype.h>
+
+/** Defines maximum count of indirect descriptors in a message header. */
+#define MAX_INDIR_DESCS  2
+
+__RTL_BEGIN_DECLS
+
+/**
+ * Describes immediate data representation.
+ */
+typedef struct USMsgImm {
+    rtl_uint32_t  payload[1];  /**< Raw sender data. */
+} SMsgImm;
+
+/**
+ * Describes indirect data descriptor.
+ */
+typedef struct SIndirDesc {
+    void         *buf;          /**< Pointer to described data. */
+    rtl_uint32_t  size;         /**< Size of described data. */
+} IndirDesc;
+
+/**
+ * Describes rendezvous (synchronous) message header.
+ */
+typedef struct SSMsgHdr {
+    Handle     replyHandle;     /**< On Recv() is filled with server IPC handle. */
+    TaskId     sender;          /**< sender process id */
+    Tid        threadId;        /**< On Recv() is filled with caller's thread
+                                 *   ID. On Reply() may be filled with thread
+                                 *   ID identifying thread to reply to.
+                                 *   Set to zero to reply to first thread in
+                                 *   queue. Useful when multiple client
+                                 *   threads are used. */
+    rtl_uint64_t traceId;       /**< current trace ID  */
+    rtl_uint64_t spanId;        /**< client span ID  */
+
+    rtl_uint32_t immSize;       /**< Indicates to use either imm or indirDescs. */
+    union {
+        /** Immediate data. Used if immSize != 0. */
+        SMsgImm     imm;
+
+        /** Indirect descriptors. Used if immSize == 0. */
+        IndirDesc   indirDescs[MAX_INDIR_DESCS];
+    };
+} SMsgHdr;
+
+__RTL_END_DECLS
+
+#endif /* CORE_IPC_IF_REND_H */
+
+
+```
+
+Also we have this:
+```
+cat services/rtl/nk_msg.h | grep nk_err_t
+nk_err_t PackInMsg(struct SSMsgHdr          *uMsg,
+nk_err_t PackOutMsg(struct SSMsgHdr          *uMsg,
+```
+
+Done:
+    SMsgHdr msgReq;
+    SMsgHdr msgRes;
+
+    PackOutMsg (&msgReq, &req.base_, &reqArena);
+    PackInMsg  (&msgRes, &res.base_, NULL);
+
+    Retcode rc = Call (transport.handle, &msgReq , &msgRes);
+ 
+
 # 44
 Plan:
 1. Introduce Echo.idl  - DONE
@@ -67,6 +211,42 @@ TO
 ```
 
 What is transport.base.ops->call?
+
+it is:
+```
+/** #nk_transport_call function type. */
+typedef nk_err_t nk_transport_call_fn(struct nk_transport *,
+                                      const struct nk_message *,
+                                      const struct nk_arena *,
+                                      struct nk_message *,
+                                      struct nk_arena *);
+
+/** #nk_transport_recv function type. */
+typedef nk_err_t nk_transport_recv_fn(struct nk_transport *,
+                                      struct nk_message *,
+                                      struct nk_arena *);
+
+/** #nk_transport_reply function type. */
+typedef nk_err_t nk_transport_reply_fn(struct nk_transport *,
+                                       const struct nk_message *,
+                                       const struct nk_arena *);
+
+/** Transport function table. */
+typedef struct nk_transport_ops {
+    nk_transport_call_fn  *call;  /**< synchronous call routine         */
+    nk_transport_recv_fn  *recv;  /**< receive a request routine        */
+    nk_transport_reply_fn *reply; /**< send a reply routine             */
+} nk_transport_ops;
+
+/** Transport interface. */
+typedef struct nk_transport {
+    const nk_transport_ops *ops; /**< transport function table pointer */
+} nk_transport;
+
+```
+
+Ok. We need nk_transport_call_fn
+
 
 # 43
 Plan:

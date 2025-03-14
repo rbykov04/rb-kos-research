@@ -5,54 +5,33 @@
 #include <coresrv/nk/transport-kos.h>
 #include <coresrv/sl/sl_api.h>
 
+#include <coresrv/syscalls.h>
+#include <rtl/stdio.h>
+#include <rtl/retcode_hr.h>
+#include <services/rtl/nk_msg.h>
+
 #include "build/Echo.idl.h"
 
 #include <assert.h>
 
 
-typedef struct NkKosTransportSDK {
-    struct nk_transport  base;            /**< NK transport                    */
-    Handle               handle;          /**< connection handle: client       *
-                                           *   or server or listener           */
-    Handle               reply_handle;    /**< server handle for reply         */
-    Tid                  thread;          /**< client thread ID (tid)          */
-    nk_uint32_t          recvTimeout;     /**< timeout for Recv                */
-    nk_uint32_t          callTimeout;     /**< timeout for Call                */
-    Handle               callSyncHandle;  /**< synchronization handle for Call */
-    Handle               recvSyncHandle;  /**< synchronization handle for Recv */
-} NkKosTransportSDK;
 
 int main(void)
 {
     Handle handle = ServiceLocatorConnect("server_connection");
     assert(handle != INVALID_HANDLE);
 
-    NkKosTransport transport = {
-        .base = {},
-        .handle = handle
-    };
-    NkKosTransport_Init(&transport, handle, NK_NULL, 0);
-
     nk_iid_t riid = ServiceLocatorGetRiid(handle, "Server.main");
     assert(riid != INVALID_RIID);
-
-    struct Echo_proxy proxy = {
-        .base = {},
-        .transport = &transport.base,
-        .iid = riid
-    };
 
     /* Request and response structures. */
     Echo_Echo_req req;
     Echo_Echo_res res;
 
-
     /* Prepare response structures:fixed part and arena. */
     char reqBuffer[Echo_Echo_req_arena_size];
     struct nk_arena reqArena = NK_ARENA_INITIALIZER(
                                 reqBuffer, reqBuffer + sizeof(reqBuffer));
-
-
 
     #define MESSAGE_SIZE 100
     nk_char_t message[MESSAGE_SIZE] = "Hello from client to server!";
@@ -70,13 +49,15 @@ int main(void)
     nk_msg_set_method_id(&res, riid, Echo_Echo_mid);
     nk_msg_set_ncaps(&res, Echo_Echo_res_handles);
 
-    nk_err_t rc = transport.base.ops->call (&transport.base
-                                   , &req.base_
-                                   , &reqArena
-                                   , &res.base_
-                                   , NULL);
+    SMsgHdr msgReq;
+    SMsgHdr msgRes;
+
+    PackOutMsg (&msgReq, &req.base_, &reqArena);
+    PackInMsg  (&msgRes, &res.base_, NULL);
+
+    Retcode rc = Call (handle, &msgReq , &msgRes);
     if (rc != rcOk) {
-        fprintf(stderr, "Failed to call Server.Echo() with %d\n", rc);
+        rtl_printf("Operation has failed with rc = "RETCODE_HR_FMT"\n", RETCODE_HR_PARAMS(rc));
     }
 
     return EXIT_SUCCESS;

@@ -62,6 +62,7 @@ build/security.psl.c: build security.psl
 		${PSL_GEN_FLAGS} \
 		-o build/security.psl.c
 
+						#-DPSL_ENABLE_TRACE
 SECURITY_MODULE_FLAGS = -fno-pic \
 						-D__KOS_KERNEL__ \
 						-DQCBOR_DISABLE_FLOAT_HW_USE \
