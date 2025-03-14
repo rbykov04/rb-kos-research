@@ -6,6 +6,8 @@ LIB=MicroHs/lib
 TOOLS=MicroHs/Tools
 RUNTIME=MicroHs/src/runtime
 
+
+
 BUILD=build
 TARGET     ="aarch64-kos"
 BOARD      ="RPI4_BCM2711"
@@ -13,16 +15,48 @@ SDK        ="/opt/KasperskyOS-Community-Edition-RaspberryPi4b-1.3.0.166"
 TOOLCHAIN  = "${SDK}/toolchain"
 CC         = "${TOOLCHAIN}/bin/aarch64-kos-clang"
 
-QEMU_FLAGS    =-m 4096 -machine vexpress-a15,secure=on -cpu cortex-a72
+QEMU_FLAGS    =-m 2048 -machine vexpress-a15,secure=on -cpu cortex-a72
 QEMU_FLAGS    +=--nographic -smp 4 -serial stdio -nographic
 QEMU_FLAGS    +=-monitor none -nic none
 
-run: kos-qemu-image
-	${SDK}/toolchain/bin/qemu-system-aarch64 ${QEMU_FLAGS} -kernel kos-qemu-image
+ROOT_DIR            :=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+#NK_GEN_FLAGS        = -P${SDK}/sysroot-aarch64-kos/include/system.platform
+NK_GEN_FLAGS       += -I${SDK}/sysroot-aarch64-kos/include
+NK_GEN_FLAGS       += -I${SDK}/toolchain/include
+NK_GEN_FLAGS       += -I${ROOT_DIR}
+
+
+
+
+run: build/kos-qemu-image
+	${SDK}/toolchain/bin/qemu-system-aarch64 ${QEMU_FLAGS} -kernel build/kos-qemu-image
+
+build:
+	mkdir build
+
+build/Client: build client.c build/Echo.idl.h
+	${CC} client.c -o build/Client
+
+build/Echo.idl.h: Echo.idl
+	${SDK}/toolchain/bin/nk-gen-c \
+		Echo.idl \
+		${NK_GEN_FLAGS} \
+	-o build
+
+
+
+build/Server: build server.c build/Server.edl.h
+	${CC} server.c -o build/Server
+
+build/Server.edl.h: Server.edl Echo.idl
+	${SDK}/toolchain/bin/nk-gen-c \
+		Server.edl \
+		${NK_GEN_FLAGS} \
+	-o build
 
 INIT_FLAGS = --target=aarch64-kos -static -no-pie
-Init: init.c
-	${CC} ${INIT_FLAGS} init.c -o Init
+build/Init: build init.c
+	${CC} ${INIT_FLAGS} init.c -o build/Init
 
 ROOT_DIR            :=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 PSL_GEN_FLAGS        = -P${SDK}/sysroot-aarch64-kos/include/system.platform
@@ -30,12 +64,13 @@ PSL_GEN_FLAGS       += -I${SDK}/sysroot-aarch64-kos/include
 PSL_GEN_FLAGS       += -I${SDK}/toolchain/include
 PSL_GEN_FLAGS       += -I${ROOT_DIR}
 
-security.psl.c: security.psl
+build/security.psl.c: build security.psl
 	${SDK}/toolchain/bin/nk-psl-gen-c \
 		security.psl \
 		${PSL_GEN_FLAGS} \
-		-o security.psl.c
+		-o build/security.psl.c
 
+						#-DPSL_ENABLE_TRACE
 SECURITY_MODULE_FLAGS = -fno-pic \
 						-D__KOS_KERNEL__ \
 						-DQCBOR_DISABLE_FLOAT_HW_USE \
@@ -72,10 +107,11 @@ SECURITY_MODULE_FLAGS = -fno-pic \
 						-L/${SDK}/toolchain/lib/clang/17/lib/kos \
 						-lclang_rt.builtins-aarch64
 
-ksm.module: security.psl.c
-	${CC} ${SECURITY_MODULE_FLAGS} security.psl.c -o ksm.module
+build/ksm.module: build/security.psl.c
+	${CC} ${SECURITY_MODULE_FLAGS} build/security.psl.c -o build/ksm.module
 
-kos-qemu-image: Hello Init ksm.module
+build/kos-qemu-image: build/Client build/Server build/Init build/ksm.module Hello
+	cd build && \
 	${SDK}/toolchain/bin/kos_make_kimg \
 	--target=aarch64-kos \
 	--with-extra-ldflags=-no-pie \
@@ -87,9 +123,13 @@ kos-qemu-image: Hello Init ksm.module
     --img-dst=kos-qemu-image \
     --max-filesize= \
     --with-init=Init \
-    Hello \
+    ../Hello \
+    Client \
+    Server \
     ksm.module
 
+runHost: HelloHost
+	./HelloHost
 
 Hello: Hello.c
 	${CC} \
@@ -98,10 +138,6 @@ Hello: Hello.c
 		eval-kos-64.c \
 		-static \
 		-o Hello
-
-runHost: HelloHost
-	./HelloHost
-
 
 
 HelloHost: Hello.c
@@ -129,25 +165,22 @@ Addcombs: MicroHs
 test: MicroHs
 	cd MicroHs && make runtest
 
+
+
 MicroHs:
 	git clone https://github.com/augustss/MicroHs
+	cd MicroHs && git checkout 52156d4ea3aa03b0e5bd6f74e127939eba0a4490
 	cd MicroHs && make bin/mhseval
 	cd MicroHs && make bin/gmhs
 
+
+
 clean:
+	rm -rf build
 	rm -rf Hello.c
 	rm -rf Hello
 	rm -rf Hello.comb
 	rm -rf Hello-opt.comb
-	rm -f kos-qemu-image*
-	rm -f Init
-	rm -f Hello
-	rm -f HelloHost
-	rm -f Addcombs
-	rm -f ksm.module
-	rm -f security.psl.c
-
-
 
 distclean:
 	rm -rf MicroHs

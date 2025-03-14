@@ -1,3 +1,6 @@
+# 46
+Let's use haskell to write echo client
+
 # 45
 We need unpack nk_transport_call_fn
 I expec there is special syscall.

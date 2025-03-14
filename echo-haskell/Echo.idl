@@ -1,0 +1,5 @@
+package Echo
+
+interface {
+    Echo(in string<256> value);
+}

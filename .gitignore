@@ -41,3 +41,13 @@ agda-hello/security.psl.c
 
 
 echo/build/*
+echo-haskell/build/*
+echo-haskell/MicroHs
+echo-haskell/out.comb
+echo-haskell/Hello
+echo-haskell/HelloHost
+echo-haskell/Hello.c
+echo-haskell/Hello.comb
+echo-haskell/Hello-opt.comb
+echo-haskell/Addcombs
+echo-haskell/.mhsi
