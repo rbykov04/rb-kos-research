@@ -11,18 +11,6 @@ QEMU_FLAGS    =-m 2048 -machine vexpress-a15,secure=on -cpu cortex-a72
 QEMU_FLAGS    +=--nographic -smp 4 -serial stdio -nographic
 QEMU_FLAGS    +=-monitor none -nic none
 
-run: build/kos-qemu-image
-	${SDK}/toolchain/bin/qemu-system-aarch64 ${QEMU_FLAGS} -kernel build/kos-qemu-image
-
-build:
-	mkdir build
-
-build/Server: build server.c build/Server.edl.h
-	${CC} server.c -o build/Server
-
-build/Client: build client.c
-	${CC} client.c -o build/Client
-
 ROOT_DIR            :=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 #NK_GEN_FLAGS        = -P${SDK}/sysroot-aarch64-kos/include/system.platform
 NK_GEN_FLAGS       += -I${SDK}/sysroot-aarch64-kos/include
@@ -30,6 +18,27 @@ NK_GEN_FLAGS       += -I${SDK}/toolchain/include
 NK_GEN_FLAGS       += -I${ROOT_DIR}
 
 
+
+
+run: build/kos-qemu-image
+	${SDK}/toolchain/bin/qemu-system-aarch64 ${QEMU_FLAGS} -kernel build/kos-qemu-image
+
+build:
+	mkdir build
+
+build/Client: build client.c build/Echo.idl.h
+	${CC} client.c -o build/Client
+
+build/Echo.idl.h: Echo.idl
+	${SDK}/toolchain/bin/nk-gen-c \
+		Echo.idl \
+		${NK_GEN_FLAGS} \
+	-o build
+
+
+
+build/Server: build server.c build/Server.edl.h
+	${CC} server.c -o build/Server
 
 build/Server.edl.h: Server.edl Echo.idl
 	${SDK}/toolchain/bin/nk-gen-c \

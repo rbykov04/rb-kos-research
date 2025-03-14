@@ -14,6 +14,13 @@ static nk_err_t echo_impl(struct Echo                 *self,
                           struct Echo_Echo_res        *res,
                           struct nk_arena             *res_arena)
 {
+    nk_uint32_t msgLen = 0;
+    nk_char_t *msg = nk_arena_get(nk_char_t, req_arena, &req->value, &msgLen);
+    if (msg == RTL_NULL) {
+        fprintf(stderr, "[Server]: Error: can`t get message from arena!\n");
+        return NK_EBADMSG;
+    }
+    fprintf(stderr, "%s\n", msg);
     return NK_EOK;
 }
 
@@ -27,7 +34,7 @@ int main(void)
     NkKosTransport_Init(&transport, handle, NK_NULL, 0);
 
 
-    Server_entity_req req = {0};
+   Server_entity_req req = {0};
     char req_buffer[Server_entity_req_arena_size] = {};
     struct nk_arena req_arena = NK_ARENA_INITIALIZER(req_buffer,
                                         req_buffer + sizeof(req_buffer));
@@ -44,7 +51,6 @@ int main(void)
     Server_entity entity;
     Server_entity_init(&entity, &impl);
 
-    fprintf(stderr, "Hello I'm server\n");
 
     //do
     {
@@ -63,6 +69,7 @@ int main(void)
             Server_entity_dispatch(&entity, &req.base_, &req_arena,
                                         &res.base_, &res_arena);
         }
+
 
         /* Send response. */
         if (nk_transport_reply(&transport.base,

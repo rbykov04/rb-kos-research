@@ -9,6 +9,98 @@ Plan:
 
 Let's upgrade Client
 
+The first we need to generate proxy from IDL.
+
+```
+build/Echo.idl.h: Echo.idl
+	${SDK}/toolchain/bin/nk-gen-c \
+		Echo.idl \
+		${NK_GEN_FLAGS} \
+	-o build
+
+```
+
+Result:
+
+```
+ls -la build | grep Echo
+-rw-rw-r-- 1 rbykov rbykov    9833 мар 14 10:24 Echo.idl.h
+-rw-rw-r-- 1 rbykov rbykov     209 мар 14 10:24 Echo.idl.nk.d
+```
+
+```
+cat build/Echo.idl.h | grep "proxy" 
+typedef struct Echo_proxy {
+        } Echo_proxy;
+nk_err_t Echo_Echo_proxy(struct Echo_proxy *self,
+void Echo_proxy_init(struct Echo_proxy *self,
+    return Echo_Echo_proxy((struct Echo_proxy *) self,
+```
+
+Let's use.
+Ok! It wasn't easy but:
+```
+client.c
+    #define MESSAGE_SIZE 100
+    nk_char_t message[MESSAGE_SIZE] = "Hello from client to server!";
+    nk_arena_store(nk_char_t
+                  , &reqArena
+                  , &(req.value)
+                  , message
+                  , MESSAGE_SIZE);
+
+    //         package    method
+    //              |     |
+    nk_err_t ret = Echo_Echo(&proxy.base, &req, &reqArena, &res, NULL);
+
+```
+```
+server.c
+
+static nk_err_t echo_impl(struct Echo                 *self,
+                          const struct Echo_Echo_req  *req,
+                          const struct nk_arena       *req_arena,
+                          struct Echo_Echo_res        *res,
+                          struct nk_arena             *res_arena)
+{
+    nk_uint32_t msgLen = 0;
+    nk_char_t *msg = nk_arena_get(nk_char_t, req_arena, &req->value, &msgLen);
+    if (msg == RTL_NULL) {
+        fprintf(stderr, "[Server]: Error: can`t get message from arena!\n");
+        return NK_EBADMSG;
+    }
+    fprintf(stderr, "%s\n", msg);
+    return NK_EOK;
+}
+```
+
+And result:
+```
+[TIME ] Time infrastructure initialized.
+[ROFS ] Files: 4, size: 3043328 (0x002e7000).
+[ROFS ] File #00: einit            - size:   941912 (0x000e5f58)
+[ROFS ] File #01: Client           - size:  1004456 (0x000f53a8)
+[ROFS ] File #02: Server           - size:  1004592 (0x000f5430)
+[ROFS ] File #03: ksm.module       - size:    78120 (0x00013128)
+[VMM  ] Virtual Memory Manager service initialized.
+[IO   ] I/O subsystem successfully initialized.
+[FS   ] File System Manager successfully initialized.
+[CM   ] Connection Manager successfully initialized.
+[KSM  ] Module: 'ksm.module' loaded.
+[KSM  ] Audit log created.
+[KSM  ] Module: 'ksm.module' initialized.
+[KSM  ] Server: 'kl.core.Core' executed.
+[KSM  ] Security system successfully initialized.
+[INIT ] Starting 'Einit' ...
+[INIT ] Starting system worker.
+[2025-03-14T08:22:55.071][Info][Einit][11:11][CRT0] VFS filesystem and network backends initialized with stub (related calls will return EIO)
+[2025-03-14T08:22:55.217][Info][Client][13:13][CRT0] VFS filesystem and network backends initialized with stub (related calls will return EIO)
+[2025-03-14T08:22:55.218][Info][Server][12:12][CRT0] VFS filesystem and network backends initialized with stub (related calls will return EIO)
+Hello from client to server!
+[INIT ] System worker finished
+
+```
+
 
 # 42
 Plan:
