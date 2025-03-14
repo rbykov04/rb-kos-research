@@ -18,11 +18,11 @@
 
 #define MESSAGE_SIZE 100
 
-int sendToHello( const char *connection
+int sendToHello( Handle handle
                , const char *message
                , int size)
 {
-    Handle handle = ServiceLocatorConnect(connection);
+ //   Handle handle = ServiceLocatorConnect(connection);
     assert(handle != INVALID_HANDLE);
 
     nk_iid_t riid = ServiceLocatorGetRiid(handle, "Server.main");
@@ -34,9 +34,7 @@ int sendToHello( const char *connection
 
     /* Prepare response structures:fixed part and arena. */
     char reqBuffer[Echo_Echo_req_arena_size];
-    struct nk_arena reqArena = NK_ARENA_INITIALIZER(
-                                reqBuffer, reqBuffer + sizeof(reqBuffer));
-
+    struct nk_arena reqArena = NK_ARENA_INITIALIZER(reqBuffer, reqBuffer + sizeof(reqBuffer));
     assert (size < MESSAGE_SIZE-1);
     char buf[MESSAGE_SIZE] = {};
     strncpy(buf, message, size);
@@ -71,13 +69,21 @@ int sendToHello( const char *connection
 
 void hello(int s)
 {
-    mhs_from_Int(s, 3, sendToHello( mhs_to_Ptr(s, 0)    // connection
+    mhs_from_Int(s, 3, sendToHello( mhs_to_Int(s, 0)    // connection
                                   , mhs_to_Ptr(s, 1)    // text
                                   , mhs_to_Int(s, 2))); // size
 }
 
+
+void serverLocatorConnect(int s){
+    mhs_from_Int(s, 1, ServiceLocatorConnect(mhs_to_Ptr(s, 0)));    // connection
+}
+
+
+
 static struct ffi_entry table[] = {
 { "hello", hello},
+{ "serverLocatorConnect", serverLocatorConnect},
 { 0,0 }
 };
 struct ffi_entry *xffi_table = table;

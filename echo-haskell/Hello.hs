@@ -1,21 +1,31 @@
 module Hello where
-import System.IO
 import Foreign.C.String
+import Data.Word
 
-foreign import ccall "hello" c_hello ::  CString -> CString -> Int -> IO (Int)
+foreign import ccall "hello" c_hello ::  Word32 -> CString -> Int -> IO (Int)
+foreign import ccall "serverLocatorConnect" c_serverLocatorConnect ::  CString -> IO (Word32)
 
-say :: String -> IO (Int)
-say text = do
-  withCAString text                $ \ s ->
-    withCAString "server_connection" $ \ connection ->
-      c_hello connection s (length text)
+data Handle = Handle Word32
+
+serverLocatorConnect :: String -> IO (Handle)
+serverLocatorConnect connection = do
+  h <- withCAString connection c_serverLocatorConnect
+  return $ Handle h
+
+say :: Handle -> String -> IO (Int)
+say (Handle h) text = do
+  withCAString text   $ \ s ->
+      c_hello h s (length text)
+
+
 
 main :: IO (Int)
 main = do
-  say "Hello From Haskell "
-  say "1 Hello From Haskell "
-  say "2 Hello From Haskell "
-  say "3 Hello From Haskell "
-  say "4 Hello From Haskell "
-  say "5 Hello From Haskell "
-  say "6 Hello From Haskell "
+  h <- serverLocatorConnect "server_connection"
+  say h "Hello From Haskell "
+  say h "1 Hello From Haskell "
+  say h "2 Hello From Haskell "
+  say h "3 Hello From Haskell "
+  say h "4 Hello From Haskell "
+  say h "5 Hello From Haskell "
+  say h "6 Hello From Haskell "
