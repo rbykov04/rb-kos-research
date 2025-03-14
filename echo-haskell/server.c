@@ -52,7 +52,7 @@ int main(void)
     Server_entity_init(&entity, &impl);
 
 
-    //do
+    do
     {
         /* Reset the buffer containing the request and response. */
         nk_req_reset(&req);
@@ -78,7 +78,7 @@ int main(void)
             fprintf(stderr, "nk_transport_reply error\n");
         }
     }
-    //while (true);
+    while (true);
 
     return EXIT_SUCCESS;
 }

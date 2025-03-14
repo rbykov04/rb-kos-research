@@ -95,6 +95,11 @@ int main(void) {
         return EXIT_FAILURE;
     }
 
+    if (EntityConnectToService(task_hello_Hello_0, task_Server, "server_connection") != rcOk) {
+        fprintf(stderr, "Can't setup a connection %s\n", "server_connection");
+        return EXIT_FAILURE;
+    }
+
 
     /*------------------------*/
     if (EntityRun(task_Server) != rcOk) {
