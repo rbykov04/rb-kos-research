@@ -51,3 +51,9 @@ echo-haskell/Hello.comb
 echo-haskell/Hello-opt.comb
 echo-haskell/Addcombs
 echo-haskell/.mhsi
+
+simple-ksm/build/*
+simple-ksm/Hello
+simple-ksm/Init
+simple-ksm/ksm.module
+simple-ksm/kos-qemu-image*
