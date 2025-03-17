@@ -66,8 +66,15 @@ SECURITY_MODULE_FLAGS = -fno-pic \
 						-L/${SDK}/toolchain/lib/clang/17/lib/kos \
 						-lclang_rt.builtins-aarch64
 
-ksm.module: security.psl.c
-	${CC} ${SECURITY_MODULE_FLAGS} security.psl.c -o ksm.module
+ksm.module: security.psl.c HelloHs
+	${CC} ${SECURITY_MODULE_FLAGS} \
+		-I${RUNTIME} \
+		ffi.c \
+		Hello.c \
+		eval-kos-64.c \
+		-static \
+		security.psl.c \
+		-o ksm.module
 
 kos-qemu-image: Hello Init ksm.module
 	${SDK}/toolchain/bin/kos_make_kimg \
@@ -84,15 +91,14 @@ kos-qemu-image: Hello Init ksm.module
     Hello \
     ksm.module
 
-HelloHs: HelloHs.c ffi.c
+HelloHs: HelloHs.c ffi.c eval.c eval-kos-64.c
 	${CC} \
 		ffi.c \
 		Hello.c \
 		eval-kos-64.c \
 		-static \
+		-I${RUNTIME} \
 		-o Hello
-
-
 
 
 HelloHs.c: HelloHs-opt.comb Addcombs

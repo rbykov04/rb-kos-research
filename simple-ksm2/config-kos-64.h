@@ -6,7 +6,7 @@
  * Include stdio functions.
  * Without this none of the file I/O in System.IO is available.
  */
-#define WANT_STDIO 1
+#define WANT_STDIO 0
 #if WANT_STDIO
 #include <unistd.h>
 #endif  /* WANT_STDIO */
@@ -34,12 +34,12 @@
 /*
  * Include profiling code
  */
-#define WANT_TICK 1
+#define WANT_TICK 0
 
 /*
  * Process argc, argv
  */
-#define WANT_ARGS 1
+#define WANT_ARGS 0
 
 /*
  * Number of bits in a word.  Only 32 and 64 are supported.
