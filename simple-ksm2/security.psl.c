@@ -118,6 +118,14 @@ nk_err_t __kss_execute(kss_decision_t *decision, kss_eid_t src_eid,
                        struct nk_arena *arena,
                        struct kss_audit_message *audit_message)
 {
+    nk_unused(src_eid);
+    nk_unused(src_sid);
+    nk_unused(dst_eid);
+    nk_unused(dst_sid);
+    nk_unused(message);
+    nk_unused(arena);
+    nk_unused(audit_message);
+
     *decision = KSS_GRANT;
     PSL_TRACE(CLS_PSL, "PSL", "src: %d, dst: %d", src_eid, dst_eid);
     return NK_EOK;
@@ -128,6 +136,14 @@ nk_err_t __kss_request(kss_decision_t *decision, kss_eid_t src_eid,
                        struct nk_arena *arena,
                        struct kss_audit_message *audit_message)
 {
+    nk_unused(src_eid);
+    nk_unused(src_sid);
+    nk_unused(dst_eid);
+    nk_unused(dst_sid);
+    nk_unused(message);
+    nk_unused(arena);
+    nk_unused(audit_message);
+
     *decision = KSS_GRANT;
     return NK_EOK;
 }
@@ -138,6 +154,15 @@ nk_err_t __kss_response(kss_decision_t *decision, kss_eid_t src_eid,
                         struct nk_arena *arena,
                         struct kss_audit_message *audit_message)
 {
+
+    nk_unused(src_eid);
+    nk_unused(src_sid);
+    nk_unused(dst_eid);
+    nk_unused(dst_sid);
+    nk_unused(message);
+    nk_unused(arena);
+    nk_unused(audit_message);
+
     *decision = KSS_GRANT;
     return NK_EOK;
 }
@@ -147,6 +172,15 @@ nk_err_t __kss_error(kss_decision_t *decision, kss_eid_t src_eid,
                      struct nk_arena *arena,
                      struct kss_audit_message *audit_message)
 {
+
+    nk_unused(src_eid);
+    nk_unused(src_sid);
+    nk_unused(dst_eid);
+    nk_unused(dst_sid);
+    nk_unused(message);
+    nk_unused(arena);
+    nk_unused(audit_message);
+
     *decision = KSS_GRANT;
     return NK_EOK;
 }
@@ -155,6 +189,12 @@ nk_err_t __kss_security(kss_decision_t *decision, kss_eid_t driver_eid,
                         const struct nk_arena *arena,
                         struct kss_audit_message *audit_message)
 {
+
+    nk_unused(driver_eid);
+    nk_unused(driver_sid);
+    nk_unused(message);
+    nk_unused(arena);
+    nk_unused(audit_message);
     *decision = KSS_GRANT;
     return NK_EOK;
 }
