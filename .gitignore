@@ -52,8 +52,19 @@ echo-haskell/Hello-opt.comb
 echo-haskell/Addcombs
 echo-haskell/.mhsi
 
-simple-ksm/build/*
-simple-ksm/Hello
-simple-ksm/Init
-simple-ksm/ksm.module
-simple-ksm/kos-qemu-image*
+simple-ksm2/build/*
+simple-ksm2/Hello
+simple-ksm2/Init
+simple-ksm2/ksm.module
+simple-ksm2/kos-qemu-image*
+simple-ksm2/MicroHs
+simple-ksm2/out.comb
+simple-ksm2/Hello
+simple-ksm2/HelloHs
+simple-ksm2/HelloHost
+simple-ksm2/HelloHs.c
+simple-ksm2/HelloHs.comb
+simple-ksm2/HelloHs-opt.comb
+simple-ksm2/Addcombs
+simple-ksm2/.mhsi
+simple-ksm2/build/*
