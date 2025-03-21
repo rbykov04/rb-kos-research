@@ -28,18 +28,26 @@ int sendToHello( Handle handle
     assert(handle != INVALID_HANDLE);
     assert(riid != INVALID_RIID);
 
-    /* Request and response structures. */
-    Echo_Echo_req req;
-    Echo_Echo_res res;
 
     /* Prepare response structures:fixed part and arena. */
     char reqBuffer[Echo_Echo_req_arena_size];
-    struct nk_arena reqArena = NK_ARENA_INITIALIZER(reqBuffer, reqBuffer + sizeof(reqBuffer));
+    struct nk_arena reqArena  = {
+        .start     = reqBuffer,
+        .current   = reqBuffer,
+        .end       = reqBuffer + Echo_Echo_req_arena_size
+    };
 
+
+    assert (Echo_Echo_req_arena_size == sizeof(reqBuffer) );
     assert (size < MESSAGE_SIZE-1);
     char buf[MESSAGE_SIZE] = {};
     strncpy(buf, message, size);
     buf[size+1] = 0;
+
+
+    /* Request and response structures. */
+    Echo_Echo_req req;
+    Echo_Echo_res res;
     nk_arena_store(nk_char_t
                   , &reqArena
                   , &(req.value)
