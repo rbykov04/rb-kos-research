@@ -17,15 +17,15 @@
 #include <assert.h>
 
 #define MESSAGE_SIZE 100
+//
+
 
 int sendToHello( Handle handle
+               , nk_iid_t riid
                , const char *message
                , int size)
 {
- //   Handle handle = ServiceLocatorConnect(connection);
     assert(handle != INVALID_HANDLE);
-
-    nk_iid_t riid = ServiceLocatorGetRiid(handle, "Server.main");
     assert(riid != INVALID_RIID);
 
     /* Request and response structures. */
@@ -35,6 +35,7 @@ int sendToHello( Handle handle
     /* Prepare response structures:fixed part and arena. */
     char reqBuffer[Echo_Echo_req_arena_size];
     struct nk_arena reqArena = NK_ARENA_INITIALIZER(reqBuffer, reqBuffer + sizeof(reqBuffer));
+
     assert (size < MESSAGE_SIZE-1);
     char buf[MESSAGE_SIZE] = {};
     strncpy(buf, message, size);
@@ -69,21 +70,40 @@ int sendToHello( Handle handle
 
 void hello(int s)
 {
-    mhs_from_Int(s, 3, sendToHello( mhs_to_Int(s, 0)    // connection
-                                  , mhs_to_Ptr(s, 1)    // text
-                                  , mhs_to_Int(s, 2))); // size
+    mhs_from_Int(s, 4, sendToHello( mhs_to_Int(s, 0)     // handle
+                                  , mhs_to_CUShort(s, 1) // riid
+                                  , mhs_to_Ptr(s, 2)     // text
+                                  , mhs_to_Int(s, 3)));  // size
 }
 
 
-void serverLocatorConnect(int s){
+void serverLocatorConnect(int s)
+{
     mhs_from_Int(s, 1, ServiceLocatorConnect(mhs_to_Ptr(s, 0)));    // connection
+}
+
+void serviceLocatorGetRiid(int s)
+{
+
+/*
+ ServiceLocatorGetRiid will return type = nk_iid_t
+ typedef nk_uint16_t nk_iid_t;
+*/
+    mhs_from_CUShort(s,
+                    2,
+                    ServiceLocatorGetRiid(mhs_to_Int(s, 0),   // handle
+                                          mhs_to_Ptr(s, 1))); // endpoint
+
 }
 
 
 
 static struct ffi_entry table[] = {
 { "hello", hello},
-{ "serverLocatorConnect", serverLocatorConnect},
+{ "serverLocatorConnect",  serverLocatorConnect},
+{ "serviceLocatorGetRiid", serviceLocatorGetRiid},
 { 0,0 }
 };
 struct ffi_entry *xffi_table = table;
+
+    //nk_iid_t riid = ServiceLocatorGetRiid(handle, "Server.main");
