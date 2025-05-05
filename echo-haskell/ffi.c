@@ -24,35 +24,20 @@ int sendToHello( Handle handle
                , nk_iid_t riid
                , const char *message
                , int size
-               , char *reqBuffer
+               , struct nk_arena *reqArena
                )
 {
     assert(handle != INVALID_HANDLE);
     assert(riid != INVALID_RIID);
+    assert(reqArena != NULL);
 
-
-    struct nk_arena reqArena  = {
-        .start     = reqBuffer,
-        .current   = reqBuffer,
-        .end       = reqBuffer + Echo_Echo_req_arena_size
-    };
-
-
-    //assert (Echo_Echo_req_arena_size == sizeof(reqBuffer) );
-    assert (size < MESSAGE_SIZE-1);
-    char buf[MESSAGE_SIZE] = {};
-    strncpy(buf, message, size);
-    buf[size+1] = 0;
-
-
-    /* Request and response structures. */
     Echo_Echo_req req;
     Echo_Echo_res res;
     nk_arena_store(nk_char_t
-                  , &reqArena
+                  , reqArena
                   , &(req.value)
-                  , buf
-                  , size + 1);
+                  , message
+                  , size );
 
 
     rtl_printf("Echo mid = %d \n", Echo_Echo_mid);
@@ -66,7 +51,7 @@ int sendToHello( Handle handle
     SMsgHdr msgReq;
     SMsgHdr msgRes;
 
-    PackOutMsg (&msgReq, &req.base_, &reqArena);
+    PackOutMsg (&msgReq, &req.base_, reqArena);
     PackInMsg  (&msgRes, &res.base_, NULL);
 
     Retcode rc = Call (handle, &msgReq , &msgRes);
@@ -83,10 +68,16 @@ void hello(int s)
                                   , mhs_to_CUShort(s, 1) // riid
                                   , mhs_to_Ptr(s, 2)     // text
                                   , mhs_to_Int(s, 3)     // size
-                                  , mhs_to_Ptr(s, 4)     // buf
+                                  , mhs_to_Ptr(s, 4)     // ArenaStruct
                                   ));
 }
 
+void nkArenaInit(int s){
+    nk_arena_init ( mhs_to_Ptr(s, 0)
+                  , mhs_to_Ptr(s, 1)
+                  , mhs_to_Ptr(s, 1) + mhs_to_Int(s, 2));
+
+}
 
 void serverLocatorConnect(int s)
 {
@@ -109,12 +100,14 @@ void serviceLocatorGetRiid(int s)
 
 
 
+
+
 static struct ffi_entry table[] = {
 { "hello", hello},
 { "serverLocatorConnect",  serverLocatorConnect},
 { "serviceLocatorGetRiid", serviceLocatorGetRiid},
+{ "nkArenaInit",           nkArenaInit},
 { 0,0 }
 };
 struct ffi_entry *xffi_table = table;
 
-    //nk_iid_t riid = ServiceLocatorGetRiid(handle, "Server.main");
