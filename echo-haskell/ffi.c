@@ -23,14 +23,14 @@
 int sendToHello( Handle handle
                , nk_iid_t riid
                , const char *message
-               , int size)
+               , int size
+               , char *reqBuffer
+               )
 {
     assert(handle != INVALID_HANDLE);
     assert(riid != INVALID_RIID);
 
 
-    /* Prepare response structures:fixed part and arena. */
-    char reqBuffer[Echo_Echo_req_arena_size];
     struct nk_arena reqArena  = {
         .start     = reqBuffer,
         .current   = reqBuffer,
@@ -38,7 +38,7 @@ int sendToHello( Handle handle
     };
 
 
-    assert (Echo_Echo_req_arena_size == sizeof(reqBuffer) );
+    //assert (Echo_Echo_req_arena_size == sizeof(reqBuffer) );
     assert (size < MESSAGE_SIZE-1);
     char buf[MESSAGE_SIZE] = {};
     strncpy(buf, message, size);
@@ -55,6 +55,7 @@ int sendToHello( Handle handle
                   , size + 1);
 
 
+    rtl_printf("Echo mid = %d \n", Echo_Echo_mid);
     nk_req_reset(&req);
     nk_msg_set_method_id(&req, riid, Echo_Echo_mid);
     nk_msg_set_ncaps(&req, Echo_Echo_req_handles);
@@ -78,10 +79,12 @@ int sendToHello( Handle handle
 
 void hello(int s)
 {
-    mhs_from_Int(s, 4, sendToHello( mhs_to_Int(s, 0)     // handle
+    mhs_from_Int(s, 5, sendToHello( mhs_to_Int(s, 0)     // handle
                                   , mhs_to_CUShort(s, 1) // riid
                                   , mhs_to_Ptr(s, 2)     // text
-                                  , mhs_to_Int(s, 3)));  // size
+                                  , mhs_to_Int(s, 3)     // size
+                                  , mhs_to_Ptr(s, 4)     // buf
+                                  ));
 }
 
 

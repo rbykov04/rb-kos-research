@@ -1,8 +1,11 @@
 module Hello where
 import Foreign.C.String
+import Foreign.Ptr
+import Foreign.Marshal.Alloc
+import Foreign.Storable
 import Data.Word
 
-foreign import ccall "hello" c_hello ::  Word32 -> Word16 -> CString -> Int -> IO (Int)
+foreign import ccall "hello" c_hello ::  Word32 -> Word16 -> CString -> Int -> Ptr Char -> IO (Int)
 foreign import ccall "serverLocatorConnect" c_serverLocatorConnect ::  CString -> IO (Word32)
 foreign import ccall "serviceLocatorGetRiid" c_serviceLocatorGetRiid ::  Word32 -> CString -> IO (Word16)
 
@@ -20,13 +23,22 @@ serviceLocatorGetRiid (Handle h) endpoint = do
   return $ Riid r
 
 
+constEchoEchoReqArenaSize :: Int
+constEchoEchoReqArenaSize  = 257
 
 say :: Handle -> Riid -> String -> IO (Int)
 say (Handle h) (Riid r) text = do
-  withCAString text   $ \ s ->
-      c_hello h r s (length text)
+  allocaBytes constEchoEchoReqArenaSize $ \ buf ->  -- TODO: clean buf
+    withCAString text   $ \ s ->
+        c_hello h r s (length text) buf
 
+data Arena = Arena
+  { startArena :: Ptr ()
+  , currentArena :: Ptr ()
+  , endArena :: Ptr ()
+  }
 
+type ArenaPtr = Ptr Arena
 
 main :: IO (Int)
 main = do
