@@ -12,12 +12,62 @@
 #include <rtl/retcode_hr.h>
 #include <services/rtl/nk_msg.h>
 
-#include "build/Echo.idl.h"
-
 #include <assert.h>
 
+enum {
+    Echo_Echo_mid,
+    Echo_mid_max,
+};
+enum {
+    Echo_Echo_req_value_size = 257,
+    Echo_Echo_req_arena_size = 257,
+    Echo_Echo_res_arena_size = 0,
+    Echo_Echo_req_handles = 0,
+    Echo_Echo_res_handles = 0,
+    Echo_Echo_err_handles = 0,
+    Echo_req_arena_size = 257,
+    Echo_res_arena_size = 0,
+    Echo_req_handles = 0,
+    Echo_res_handles = 0,
+    Echo_err_handles = 0,
+};
+typedef struct __nk_packed EchoReq {
+            __nk_alignas(8)
+            struct nk_message base_;
+            __nk_alignas(4) nk_ptr_t value;
+        } EchoReq;
+static_assert(sizeof(EchoReq) == 32, "bad_Echo_Echo_req_size");
+static_assert(nk_offsetof(EchoReq, base_) == 0, "bad_Echo_Echo_req_base__offset");
+static_assert(nk_offsetof(EchoReq, value) == 24, "bad_Echo_Echo_req_value_offset");
+
+#pragma pack(push, 8) /* Echo_Echo_res */
+typedef struct Echo_Echo_err {
+            __nk_alignas(8)
+            struct nk_message base_;
+        } Echo_Echo_err;
+static_assert(sizeof(Echo_Echo_err) == 24, "bad_Echo_Echo_err_size");
+static_assert(nk_offsetof(Echo_Echo_err, base_) == 0, "bad_Echo_Echo_err_base__offset");
+typedef struct Echo_Echo_res {
+            union {
+                struct {
+                    __nk_alignas(8)
+                    struct nk_message base_;
+                };
+                struct {
+                    __nk_alignas(8)
+                    struct nk_message base_;
+                } res_;
+                struct Echo_Echo_err err_;
+            };
+        } Echo_Echo_res;
+static_assert(sizeof(Echo_Echo_res) == 24, "bad_Echo_Echo_res_size");
+static_assert(nk_offsetof(Echo_Echo_res, base_) == 0, "bad_Echo_Echo_res_base__offset");
+#pragma pack(pop) /* Echo_Echo_res */
+
+
+
+
 #define MESSAGE_SIZE 100
-//
 
 
 int sendToHello( Handle handle
@@ -31,7 +81,7 @@ int sendToHello( Handle handle
     assert(riid != INVALID_RIID);
     assert(reqArena != NULL);
 
-    Echo_Echo_req req;
+    EchoReq req;
     Echo_Echo_res res;
     nk_arena_store(nk_char_t
                   , reqArena

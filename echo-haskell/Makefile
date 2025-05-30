@@ -54,6 +54,15 @@ build/Server.edl.h: Server.edl Echo.idl
 		${NK_GEN_FLAGS} \
 	-o build
 
+build/Echo.idl.json: Echo.idl
+	${SDK}/toolchain/bin/nk-driver \
+		Echo.idl \
+		${NK_GEN_FLAGS} \
+	--schema-version idl2 \
+	-o build/Echo.idl.json
+
+
+
 INIT_FLAGS = --target=aarch64-kos -static -no-pie
 build/Init: build init.c
 	${CC} ${INIT_FLAGS} init.c -o build/Init
