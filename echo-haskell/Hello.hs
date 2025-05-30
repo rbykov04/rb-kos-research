@@ -20,6 +20,7 @@ foreign import ccall "nkFillEnvelope" c_nkFillVenvelope :: Ptr () -> Int -> Word
 
 data Handle = Handle Word32
 data Riid = Riid Word16 -- Here must be uint16_t
+data Mid = Mid CUShort
 
 serverLocatorConnect :: String -> IO (Handle)
 serverLocatorConnect connection = do
@@ -32,31 +33,64 @@ serviceLocatorGetRiid (Handle h) endpoint = do
   return $ Riid r
 
 
-constEchoEchoReqArenaSize :: Int
-constEchoEchoReqArenaSize  = 257
-
-
 arenaStructSize :: Int
 arenaStructSize = 3 * 8 --HACK?
 
-mid :: CUShort
-mid = CUShort 0
+valueOffset :: Int
+valueOffset = 24
 
-ncaps :: CUInt
-ncaps = CUInt 0
+withEnvelope :: forall a . Int -> Riid -> Mid -> CUInt -> (Ptr () -> IO a) -> IO a
+withEnvelope size (Riid riid) (Mid mid) ncaps io =
+  allocaBytes size $ \ req -> do
+    c_nkFillVenvelope req size riid mid ncaps
+    io req
 
-say :: Handle -> Riid -> String -> IO (Int)
-say (Handle h) (Riid r) text = do
-  allocaBytes 32 $ \ req -> do
-    c_nkFillVenvelope req 32 r mid ncaps
-    allocaBytes 24 $ \ res -> do
-      c_nkFillVenvelope res 24 r mid ncaps
-      allocaBytes arenaStructSize $ \ arenaReq ->
-        allocaBytes constEchoEchoReqArenaSize $ \ buf ->
+withArena :: forall a . Int -> ( Ptr () -> IO a ) -> IO a
+withArena size io =
+    allocaBytes arenaStructSize $ \ arenaReq ->
+          allocaBytes size $ \ buf -> do
+            c_nkArenaInit arenaReq buf size
+            io arenaReq
+
+class KosMessageStaticDesc a where
+  getMid            :: a -> Mid
+
+  requestSize       :: a -> Int
+  requestNCaps      :: a -> CUInt
+  requestArenaSize  :: a -> Int
+
+  responseSize      :: a -> Int
+  responseNCaps      :: a -> CUInt
+  responseArenaSize :: a -> Int
+
+data Echo = Echo
+
+instance KosMessageStaticDesc Echo where
+  getMid            _ = Mid (CUShort 0)
+
+  requestSize       _ =  32
+  requestNCaps      _ = CUInt 0
+  requestArenaSize  _ = 257
+
+  responseSize      _ = 24
+  responseNCaps      _ = CUInt 0
+  responseArenaSize _ = 0
+
+
+withKosRpcMessage :: forall a b. (KosMessageStaticDesc a) =>
+  a -> Riid -> (Ptr () -> Ptr ()  -> Ptr () -> Ptr () -> IO b) -> IO b
+withKosRpcMessage obj riid io =
+  withEnvelope (requestSize obj)  riid (getMid obj) (requestNCaps obj) $ \ req ->
+    withEnvelope (responseSize obj) riid (getMid obj) (responseNCaps obj) $ \ res ->
+      withArena (requestArenaSize obj) $ \ arenaReq ->
+        withArena (responseArenaSize obj) $ \ arenaRes -> io req arenaReq res arenaRes
+
+say :: Handle -> Riid -> String -> IO Int
+say (Handle h) riid text =
+  withKosRpcMessage Echo riid $ \ req reqArena res resArena ->
           withCAString text   $ \ s -> do
-              c_nkArenaInit arenaReq buf constEchoEchoReqArenaSize
-              c_nkArenaStoreString arenaReq req 24 s (length text)
-              c_syscallCall h req arenaReq res nullPtr
+              c_nkArenaStoreString reqArena req valueOffset s (length text)
+              c_syscallCall h req reqArena res resArena
 
 main :: IO Int
 main = do
