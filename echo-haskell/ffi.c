@@ -14,32 +14,13 @@
 
 #include <assert.h>
 
-enum {
-    Echo_Echo_mid,
-    Echo_mid_max,
-};
-enum {
-    Echo_Echo_req_value_size = 257,
-    Echo_Echo_req_arena_size = 257,
-    Echo_Echo_res_arena_size = 0,
-    Echo_Echo_req_handles = 0,
-    Echo_Echo_res_handles = 0,
-    Echo_Echo_err_handles = 0,
-    Echo_req_arena_size = 257,
-    Echo_res_arena_size = 0,
-    Echo_req_handles = 0,
-    Echo_res_handles = 0,
-    Echo_err_handles = 0,
-};
-
-#define MESSAGE_SIZE 100
-
 void fillEnvelope(nk_message* envelope
                   , size_t size
                   , nk_iid_t riid
                   , nk_mid_t mid
                   , uint32_t ncaps)
 {
+    memset (envelope, 0 , size);
     nk_message_set_size(envelope, size);
     nk_message_make_req(envelope);
     nk_message_set_iid(envelope, riid);
@@ -47,62 +28,67 @@ void fillEnvelope(nk_message* envelope
     nk_message_set_ncaps(envelope, ncaps);
 }
 
-int sendToHello( Handle handle
-               , nk_iid_t riid
-               , const char *message
-               , int size
+void nkFillEnvelope(int s)
+{
+    fillEnvelope( mhs_to_Ptr(s, 0)   // envelope
+                , mhs_to_Int(s, 1)     // size
+                , mhs_to_CUShort(s, 2) // riid
+                , mhs_to_CUShort(s, 3) // mid
+                , mhs_to_Word(s, 4)    // ncaps
+                );
+
+}
+
+
+
+int kernelCall( Handle handle
+               , char *request
                , struct nk_arena *reqArena
+               , char *response
+               , struct nk_arena *resArena
                )
 {
-    assert(handle != INVALID_HANDLE);
-    assert(riid != INVALID_RIID);
-    assert(reqArena != NULL);
-
-    char request[32] = {0};
-    fillEnvelope ((nk_message*) &request
-                 , sizeof(request)
-                 , riid
-                 , Echo_Echo_mid
-                 , Echo_Echo_req_handles);
-
-    nk_ptr_t   *value    = (nk_ptr_t*) &request[24];
-    nk_arena_store(nk_char_t
-                  , reqArena
-                  , value
-                  , message
-                  , size );
-
-    char response[24] = {0};
-
-    fillEnvelope ((nk_message*) &response
-                 , sizeof(response)
-                 , riid
-                 , Echo_Echo_mid
-                 , Echo_Echo_res_handles);
 
     SMsgHdr msgReq;
     SMsgHdr msgRes;
 
-    PackOutMsg (&msgReq, (nk_message*) &request, reqArena);
-    PackInMsg  (&msgRes, (nk_message*) &response, NULL);
+    PackOutMsg (&msgReq, (nk_message*) request, reqArena);
+    PackInMsg  (&msgRes, (nk_message*) response, resArena);
 
     Retcode rc = Call (handle, &msgReq , &msgRes);
+
+    //TODO: Move this to haskell
     if (rc != rcOk) {
         rtl_printf("Operation has failed with rc = "RETCODE_HR_FMT"\n", RETCODE_HR_PARAMS(rc));
     }
 
-    return EXIT_SUCCESS;
+    return rc;
 }
 
-void hello(int s)
+void syscallCall(int s)
 {
-    mhs_from_Int(s, 5, sendToHello( mhs_to_Int(s, 0)     // handle
-                                  , mhs_to_CUShort(s, 1) // riid
-                                  , mhs_to_Ptr(s, 2)     // text
-                                  , mhs_to_Int(s, 3)     // size
-                                  , mhs_to_Ptr(s, 4)     // ArenaStruct
+
+    mhs_from_Int(s, 5, kernelCall( mhs_to_Int(s, 0)     // handle
+                                  , mhs_to_Ptr(s, 1)     // request
+                                  , mhs_to_Ptr(s, 2)     // ArenaStruct (req)
+                                  , mhs_to_Ptr(s, 3)     // response
+                                  , mhs_to_Ptr(s, 4)     // ArenaStruct(res)
                                   ));
 }
+
+
+void nkArenaStoreString(int s)
+{
+    nk_arena_store(nk_char_t
+                  , mhs_to_Ptr(s, 0)     // arena
+                  , mhs_to_Ptr(s, 1)     // begin of Req struct
+                    + mhs_to_Int(s, 2)     // offset //TODO FIXME (move this to haskell)
+                  , mhs_to_Ptr(s, 3)     // text
+                  , mhs_to_Int(s, 4)     // size
+                  );
+}
+
+
 
 void nkArenaInit(int s){
     nk_arena_init ( mhs_to_Ptr(s, 0)
@@ -135,10 +121,12 @@ void serviceLocatorGetRiid(int s)
 
 
 static struct ffi_entry table[] = {
-{ "hello", hello},
+{ "syscallCall",            syscallCall},
 { "serverLocatorConnect",  serverLocatorConnect},
 { "serviceLocatorGetRiid", serviceLocatorGetRiid},
 { "nkArenaInit",           nkArenaInit},
+{ "nkArenaStoreString",    nkArenaStoreString},
+{ "nkFillEnvelope",        nkFillEnvelope},
 { 0,0 }
 };
 struct ffi_entry *xffi_table = table;
