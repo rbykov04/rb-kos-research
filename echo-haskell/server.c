@@ -66,19 +66,34 @@ int main(void)
         if (ret  != NK_EOK ) {
             fprintf(stderr, "nk_transport_recv error: %d\n", ret);
         } else {
-            Server_entity_dispatch(&entity, &req.base_, &req_arena,
-                                        &res.base_, &res_arena);
-        }
+
+            struct nk_message *request = &req.base_;
+            struct nk_message *response = &res.base_;
+            struct Server_component *self = &entity;
+
+            switch (request->iid) {
+                case Server_main_iid:
+                    Echo_interface_dispatch(self->main,
+                                        request->iid,
+                                        request,
+                                        &req_arena,
+                                        response,
+                                        &res_arena);
+                    break;
+                default:
+                    fprintf(stderr, "unknown mid %d\n", request->iid);
+                }
+            }
 
 
-        /* Send response. */
-        if (nk_transport_reply(&transport.base,
-                               &res.base_,
-                               &res_arena) != NK_EOK) {
-            fprintf(stderr, "nk_transport_reply error\n");
+            /* Send response. */
+            if (nk_transport_reply(&transport.base,
+                                &res.base_,
+                                &res_arena) != NK_EOK) {
+                fprintf(stderr, "nk_transport_reply error\n");
+            }
         }
+        while (true);
+
+        return EXIT_SUCCESS;
     }
-    while (true);
-
-    return EXIT_SUCCESS;
-}
