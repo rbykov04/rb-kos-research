@@ -8,22 +8,6 @@
 
 #include "build/Server.edl.h"
 
-static nk_err_t echo_impl(struct Echo                 *self,
-                          const struct Echo_Echo_req  *req,
-                          const struct nk_arena       *req_arena,
-                          struct Echo_Echo_res        *res,
-                          struct nk_arena             *res_arena)
-{
-    nk_uint32_t msgLen = 0;
-    nk_char_t *msg = nk_arena_get(nk_char_t, req_arena, &req->value, &msgLen);
-    if (msg == RTL_NULL) {
-        fprintf(stderr, "[Server]: Error: can`t get message from arena!\n");
-        return NK_EBADMSG;
-    }
-    fprintf(stderr, "%s\n", msg);
-    return NK_EOK;
-}
-
 int main(void)
 {
     ServiceId iid;
@@ -44,14 +28,6 @@ int main(void)
     struct nk_arena res_arena = NK_ARENA_INITIALIZER(res_buffer,
                                         res_buffer + sizeof(res_buffer));
 
-
-    static const struct Echo_ops ops = {.Echo = echo_impl};
-    struct Echo impl = {&ops};
-
-    Server_entity entity;
-    Server_entity_init(&entity, &impl);
-
-
     do
     {
         /* Reset the buffer containing the request and response. */
@@ -69,19 +45,50 @@ int main(void)
 
             struct nk_message *request = &req.base_;
             struct nk_message *response = &res.base_;
-            struct Server_component *self = &entity;
+            nk_err_t rc = NK_ENOENT;
+            nk_iid_t riid = request->iid;
+            nk_mid_t mid = request->mid;
 
-            switch (request->iid) {
+
+            switch (riid) {
                 case Server_main_iid:
-                    Echo_interface_dispatch(self->main,
-                                        request->iid,
-                                        request,
-                                        &req_arena,
-                                        response,
-                                        &res_arena);
+                    switch (mid) {
+                        case Echo_Echo_mid:
+                            {
+
+                                struct Echo_Echo_res *res_ = (struct Echo_Echo_res *) response;
+                                struct Echo_Echo_req *req_ = (struct Echo_Echo_req *) request;
+
+                                nk_uint32_t msgLen = 0;
+                                nk_char_t *msg = nk_arena_get(nk_char_t, &req_arena, &req_->value, &msgLen);
+                                if (msg == RTL_NULL) {
+                                    fprintf(stderr, "[Server]: Error: can`t get message from arena!\n");
+                                    rc = NK_EBADMSG;
+                                } else {
+                                    fprintf(stderr, "%s\n", msg);
+                                    rc = NK_EOK;
+
+                                }
+
+                                if (rc == NK_EOK) {
+                                    if (nk_msg_check_err(response)) {
+                                        nk_err_reset(&res_->err_);
+                                        nk_msg_set_ncaps(res_, Echo_Echo_err_handles);
+                                    } else {
+                                        nk_req_reset(&res_->res_);
+                                        nk_msg_set_ncaps(res_, Echo_Echo_res_handles);
+                                    }
+                                }
+                            }
+
+                            break;
+                        default:
+                            fprintf(stderr, "unknown riid %d\n", request->iid);
+                            break;
+                    }
                     break;
                 default:
-                    fprintf(stderr, "unknown mid %d\n", request->iid);
+                    fprintf(stderr, "unknown riid %d\n", request->iid);
                 }
             }
 
