@@ -146,7 +146,7 @@ Server.c: Server-opt.comb Addcombs
 Server-opt.comb: Server.comb
 	$(BIN)/mhseval +RTS -rServer.comb -oServer-opt.comb
 
-Server.comb: Server.hs MicroHs
+Server.comb: Server.hs MicroHs KosTransport.hs Echo.hs
 	MHSDIR=$(MHSDIR) $(BIN)/gmhs -i$(LIB) Server -oServer.comb
 
 
@@ -176,7 +176,7 @@ Hello.c: Hello-opt.comb Addcombs
 Hello-opt.comb: Hello.comb
 	$(BIN)/mhseval +RTS -rHello.comb -oHello-opt.comb
 
-Hello.comb: Hello.hs MicroHs
+Hello.comb: Hello.hs MicroHs KosTransport.hs Echo.hs
 	MHSDIR=$(MHSDIR) $(BIN)/gmhs -i$(LIB) Hello -oHello.comb
 
 Addcombs: MicroHs
