@@ -127,46 +127,50 @@ void serviceLocatorGetRiid(int s)
 
 }
 
+void serverLocatorRegister(int s)
+{
+    const char * connection = mhs_to_Ptr(s, 0);
+    ServiceId iid;
+
+    Handle handle = ServiceLocatorRegister(connection, NULL, 0, &iid);
+
+    mhs_from_Int(s, 1, handle);
+}
+
 
 
 void serverMain(int s)
 {
-    fprintf(stderr, "serverMain begin \n");
-    ServiceId iid;
-    Handle handle = ServiceLocatorRegister("server_connection", NULL, 0, &iid);
-    assert(handle != INVALID_HANDLE);
+
+    Handle handle = mhs_to_Int(s, 0);
+
+    Server_entity_req *req = mhs_to_Ptr(s, 1);
+    struct nk_arena   *req_arena = mhs_to_Ptr(s, 2);
+
+    Server_entity_res *res = mhs_to_Ptr(s, 3);
+    struct nk_arena   *res_arena = mhs_to_Ptr(s, 4);
+
 
     NkKosTransport transport;
     NkKosTransport_Init(&transport, handle, NK_NULL, 0);
 
-
-   Server_entity_req req = {0};
-    char req_buffer[Server_entity_req_arena_size] = {};
-    struct nk_arena req_arena = NK_ARENA_INITIALIZER(req_buffer,
-                                        req_buffer + sizeof(req_buffer));
-
-    Server_entity_res res = {0};
-    char res_buffer[Server_entity_res_arena_size] = {};
-    struct nk_arena res_arena = NK_ARENA_INITIALIZER(res_buffer,
-                                        res_buffer + sizeof(res_buffer));
-
     do
     {
         /* Reset the buffer containing the request and response. */
-        nk_req_reset(&req);
-        nk_arena_reset(&req_arena);
-        nk_arena_reset(&res_arena);
+        nk_req_reset(req);
+        nk_arena_reset(req_arena);
+        nk_arena_reset(res_arena);
 
         /* Wait for a request for the server program. */
 
 
-        nk_err_t ret = nk_transport_recv(&transport.base, &req.base_, &req_arena);
+        nk_err_t ret = nk_transport_recv(&transport.base, &req->base_, req_arena);
         if (ret  != NK_EOK ) {
             fprintf(stderr, "nk_transport_recv error: %d\n", ret);
         } else {
 
-            struct nk_message *request = &req.base_;
-            struct nk_message *response = &res.base_;
+            struct nk_message *request = &req->base_;
+            struct nk_message *response = &res->base_;
             nk_err_t rc = NK_ENOENT;
             nk_iid_t riid = request->iid;
             nk_mid_t mid = request->mid;
@@ -178,11 +182,11 @@ void serverMain(int s)
                         case Echo_Echo_mid:
                             {
 
-                                struct Echo_Echo_res *res_ = (struct Echo_Echo_res *) response;
                                 struct Echo_Echo_req *req_ = (struct Echo_Echo_req *) request;
+                                struct Echo_Echo_res *res_ = (struct Echo_Echo_res *) response;
 
                                 nk_uint32_t msgLen = 0;
-                                nk_char_t *msg = nk_arena_get(nk_char_t, &req_arena, &req_->value, &msgLen);
+                                nk_char_t *msg = nk_arena_get(nk_char_t, req_arena, &req_->value, &msgLen);
                                 if (msg == RTL_NULL) {
                                     fprintf(stderr, "[Server]: Error: can`t get message from arena!\n");
                                     rc = NK_EBADMSG;
@@ -201,6 +205,8 @@ void serverMain(int s)
                                         nk_msg_set_ncaps(res_, Echo_Echo_res_handles);
                                     }
                                 }
+                                response->iid = riid;
+                                response->mid = mid;
                             }
 
                             break;
@@ -216,9 +222,7 @@ void serverMain(int s)
 
 
             /* Send response. */
-            if (nk_transport_reply(&transport.base,
-                                &res.base_,
-                                &res_arena) != NK_EOK) {
+            if (nk_transport_reply(&transport.base, &res->base_, res_arena) != NK_EOK) {
                 fprintf(stderr, "nk_transport_reply error\n");
             }
         }
@@ -232,6 +236,7 @@ void serverMain(int s)
 static struct ffi_entry table[] = {
 { "syscallCall",           syscallCall},
 { "serverLocatorConnect",  serverLocatorConnect},
+{ "serverLocatorRegister",  serverLocatorRegister},
 { "serviceLocatorGetRiid", serviceLocatorGetRiid},
 { "nkArenaInit",           nkArenaInit},
 { "nkArenaStoreString",    nkArenaStoreString},

@@ -13,19 +13,25 @@ foreign import ccall "syscallCall" c_syscallCall ::
                     Ptr () -> Ptr () ->
                     IO (Int)
 foreign import ccall "serverLocatorConnect" c_serverLocatorConnect ::  CString -> IO Word32
-foreign import ccall "serviceLocatorGetRiid" c_serviceLocatorGetRiid ::  Word32 -> CString -> IO (Word16)
+foreign import ccall "serverLocatorRegister" c_serverLocatorRegister ::  CString -> IO Word32
+foreign import ccall "serviceLocatorGetRiid" c_serviceLocatorGetRiid ::  Word32 -> CString -> IO (CUShort)
 foreign import ccall "nkArenaInit" c_nkArenaInit ::  Ptr () -> Ptr () -> Int -> IO ()
 foreign import ccall "nkArenaStoreString" c_nkArenaStoreString ::  Ptr () -> Ptr () -> Int -> CString -> Int -> IO ()
-foreign import ccall "nkFillEnvelope" c_nkFillVenvelope :: Ptr () -> Int -> Word16 -> CUShort -> CUInt -> IO ()
+foreign import ccall "nkFillEnvelope" c_nkFillVenvelope :: Ptr () -> Int -> CUShort -> CUShort -> CUInt -> IO ()
 
 
 data Handle = Handle Word32
-data Riid = Riid Word16 -- Here must be uint16_t
+data Riid = Riid CUShort
 data Mid = Mid CUShort
 
 serverLocatorConnect :: String -> IO (Handle)
 serverLocatorConnect connection = do
   h <- withCAString connection c_serverLocatorConnect
+  return $ Handle h
+
+serverLocatorRegister :: String -> IO (Handle)
+serverLocatorRegister connection = do
+  h <- withCAString connection c_serverLocatorRegister
   return $ Handle h
 
 serviceLocatorGetRiid :: Handle -> String -> IO (Riid)
