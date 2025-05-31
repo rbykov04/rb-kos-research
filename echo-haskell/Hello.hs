@@ -60,7 +60,7 @@ class KosMessageStaticDesc a where
   requestArenaSize  :: a -> Int
 
   responseSize      :: a -> Int
-  responseNCaps      :: a -> CUInt
+  responseNCaps     :: a -> CUInt
   responseArenaSize :: a -> Int
 
 data Echo = Echo
@@ -68,29 +68,40 @@ data Echo = Echo
 instance KosMessageStaticDesc Echo where
   getMid            _ = Mid (CUShort 0)
 
-  requestSize       _ =  32
+  requestSize       _ = 32
   requestNCaps      _ = CUInt 0
   requestArenaSize  _ = 257
 
   responseSize      _ = 24
-  responseNCaps      _ = CUInt 0
+  responseNCaps     _ = CUInt 0
   responseArenaSize _ = 0
 
+data KosStorage = KosStorage (Ptr ()) (Ptr ())
+
+storeString :: KosStorage -> Int -> String -> IO ()
+storeString (KosStorage req reqArena) offset text = do
+    withCAString text   $ \ s ->
+      c_nkArenaStoreString reqArena req offset s (length text)
 
 withKosRpcMessage :: forall a b. (KosMessageStaticDesc a) =>
-  a -> Riid -> (Ptr () -> Ptr ()  -> Ptr () -> Ptr () -> IO b) -> IO b
+  a -> Riid -> (KosStorage  -> KosStorage  -> IO b) -> IO b
 withKosRpcMessage obj riid io =
   withEnvelope (requestSize obj)  riid (getMid obj) (requestNCaps obj) $ \ req ->
     withEnvelope (responseSize obj) riid (getMid obj) (responseNCaps obj) $ \ res ->
       withArena (requestArenaSize obj) $ \ arenaReq ->
-        withArena (responseArenaSize obj) $ \ arenaRes -> io req arenaReq res arenaRes
+        withArena (responseArenaSize obj) $ \ arenaRes ->
+   io (KosStorage req arenaReq) (KosStorage res arenaRes)
+
+call :: Handle -> KosStorage -> KosStorage -> IO Int
+call (Handle h) (KosStorage req reqArena) (KosStorage res resArena) =
+    c_syscallCall h req reqArena res resArena
 
 say :: Handle -> Riid -> String -> IO Int
-say (Handle h) riid text =
-  withKosRpcMessage Echo riid $ \ req reqArena res resArena ->
-          withCAString text   $ \ s -> do
-              c_nkArenaStoreString reqArena req valueOffset s (length text)
-              c_syscallCall h req reqArena res resArena
+say handle riid text =
+  withKosRpcMessage Echo riid $ \ req res -> do
+    storeString req valueOffset text
+    call handle req res
+
 
 main :: IO Int
 main = do
