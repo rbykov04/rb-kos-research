@@ -12,12 +12,22 @@ foreign import ccall "syscallCall" c_syscallCall ::
                     Ptr () -> Ptr () ->
                     Ptr () -> Ptr () ->
                     IO (Int)
+
+foreign import ccall "syscallRecv" c_syscallRecv :: Word32 -> Ptr () -> Ptr () -> IO (Int)
+foreign import ccall "syscallReply" c_syscallReply :: Word32 -> Ptr () -> Ptr () -> IO (Int)
+
 foreign import ccall "serverLocatorConnect" c_serverLocatorConnect ::  CString -> IO Word32
 foreign import ccall "serverLocatorRegister" c_serverLocatorRegister ::  CString -> IO Word32
 foreign import ccall "serviceLocatorGetRiid" c_serviceLocatorGetRiid ::  Word32 -> CString -> IO (CUShort)
 foreign import ccall "nkArenaInit" c_nkArenaInit ::  Ptr () -> Ptr () -> Int -> IO ()
 foreign import ccall "nkArenaStoreString" c_nkArenaStoreString ::  Ptr () -> Ptr () -> Int -> CString -> Int -> IO ()
+foreign import ccall "nkArenaGetString" c_nkArenaGetString  :: Ptr () -> Ptr () -> Ptr () -> Int -> IO (CString)
+
 foreign import ccall "nkFillEnvelope" c_nkFillVenvelope :: Ptr () -> Int -> CUShort -> CUShort -> CUInt -> IO ()
+foreign import ccall "nkEnvelopeMid" c_nkEnvelopeMid :: Ptr () -> IO (CUShort)
+foreign import ccall "nkEnvelopeRiid" c_nkEnvelopeRiid :: Ptr () -> IO (CUShort)
+foreign import ccall "nkSetEnvelopeMid" c_nkSetEnvelopeMid :: Ptr () -> CUShort-> IO ()
+foreign import ccall "nkSetEnvelopeRiid" c_nkSetEnvelopeRiid :: Ptr () -> CUShort -> IO ()
 
 
 data Handle = Handle Word32
@@ -42,6 +52,16 @@ serviceLocatorGetRiid (Handle h) endpoint = do
 
 arenaStructSize :: Int
 arenaStructSize = 3 * 8 --HACK?
+
+getEnvelopeMid :: KosStorage -> IO (Mid)
+getEnvelopeMid (KosStorage envelope _) = do
+   mid <- c_nkEnvelopeMid envelope
+   return (Mid mid)
+
+getEnvelopeRiid :: KosStorage -> IO (Riid)
+getEnvelopeRiid (KosStorage envelope _) = do
+   mid <- c_nkEnvelopeRiid envelope
+   return (Riid mid)
 
 withEnvelope :: forall a . Int -> Riid -> Mid -> CUInt -> (Ptr () -> IO a) -> IO a
 withEnvelope size (Riid riid) (Mid mid) ncaps io =
@@ -74,6 +94,16 @@ storeString (KosStorage req reqArena) offset text = do
     withCAString text   $ \ s ->
       c_nkArenaStoreString reqArena req offset s (length text)
 
+
+getString  :: KosStorage -> Int -> IO (String)
+getString (KosStorage req reqArena) offset = do
+    allocaBytes 200 $ \ buf -> do
+      c_str <- c_nkArenaGetString req reqArena buf offset
+      text <- peekCAString c_str
+      return text
+
+
+
 withKosRpcMessage :: forall a b. (KosMessageStaticDesc a) =>
   a -> Riid -> (KosStorage  -> KosStorage  -> IO b) -> IO b
 withKosRpcMessage obj riid io =
@@ -87,3 +117,11 @@ call :: Handle -> KosStorage -> KosStorage -> IO Int
 call (Handle h) (KosStorage req reqArena) (KosStorage res resArena) =
     c_syscallCall h req reqArena res resArena
 
+
+recv :: Handle -> KosStorage -> IO Int
+recv (Handle h) (KosStorage req reqArena) =
+    c_syscallRecv h req reqArena
+
+reply :: Handle -> KosStorage -> IO Int
+reply (Handle h) (KosStorage res resArena) =
+    c_syscallReply h res resArena

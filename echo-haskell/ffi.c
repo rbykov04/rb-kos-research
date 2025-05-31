@@ -24,6 +24,34 @@
 #include "build/Server.edl.h"
 
 
+void getEnvelopeMid(int s)
+{
+    nk_message *envelope = mhs_to_Ptr(s, 0);
+    mhs_from_CUShort(s, 1, envelope->mid);
+}
+
+void setEnvelopeMid(int s)
+{
+    nk_message *envelope = mhs_to_Ptr(s, 0);
+    envelope->mid = mhs_to_CUShort(s, 1);
+}
+
+void getEnvelopeRiid(int s)
+{
+    nk_message *envelope = mhs_to_Ptr(s, 0);
+    mhs_from_CUShort(s, 1, envelope->iid);
+}
+
+void setEnvelopeRiid(int s)
+{
+    nk_message *envelope = mhs_to_Ptr(s, 0);
+    envelope->iid = mhs_to_CUShort(s, 1);
+}
+
+
+
+
+
 
 void fillEnvelope(nk_message* envelope
                   , size_t size
@@ -99,6 +127,21 @@ void nkArenaStoreString(int s)
                   );
 }
 
+void nkArenaGetString(int s)
+{
+
+    nk_ptr_t          *value     = mhs_to_Ptr(s, 0) + mhs_to_Int(s, 3);
+    struct nk_arena   *arena = mhs_to_Ptr(s, 1);
+    char *buf                    = mhs_to_Ptr(s, 2);
+
+    nk_uint32_t msgLen = 0;
+    nk_char_t *msg = nk_arena_get(nk_char_t, arena, value, &msgLen);
+    memcpy(buf, msg, msgLen);
+    mhs_from_Ptr (s, 4, buf);
+}
+
+
+
 
 
 void nkArenaInit(int s){
@@ -137,111 +180,57 @@ void serverLocatorRegister(int s)
     mhs_from_Int(s, 1, handle);
 }
 
-
-
-void serverMain(int s)
+void syscallRecv(int s)
 {
+    Handle            handle    = mhs_to_Int(s, 0);
+    nk_message       *req       = mhs_to_Ptr(s, 1);
+    struct nk_arena  *req_arena = mhs_to_Ptr(s, 2);
 
-    Handle handle = mhs_to_Int(s, 0);
+    SMsgHdr msg;
+    PackInMsg (&msg, req, req_arena);
+    Retcode rc = Recv (handle, &msg);
+    if (rc != rcOk) {
+        rtl_printf("Recv operation has failed with rc = "RETCODE_HR_FMT"\n", RETCODE_HR_PARAMS(rc));
+    }
 
-    Server_entity_req *req = mhs_to_Ptr(s, 1);
-    struct nk_arena   *req_arena = mhs_to_Ptr(s, 2);
-
-    Server_entity_res *res = mhs_to_Ptr(s, 3);
-    struct nk_arena   *res_arena = mhs_to_Ptr(s, 4);
-
-
-    NkKosTransport transport;
-    NkKosTransport_Init(&transport, handle, NK_NULL, 0);
-
-    do
-    {
-        /* Reset the buffer containing the request and response. */
-        nk_req_reset(req);
-        nk_arena_reset(req_arena);
-        nk_arena_reset(res_arena);
-
-        /* Wait for a request for the server program. */
-
-
-        nk_err_t ret = nk_transport_recv(&transport.base, &req->base_, req_arena);
-        if (ret  != NK_EOK ) {
-            fprintf(stderr, "nk_transport_recv error: %d\n", ret);
-        } else {
-
-            struct nk_message *request = &req->base_;
-            struct nk_message *response = &res->base_;
-            nk_err_t rc = NK_ENOENT;
-            nk_iid_t riid = request->iid;
-            nk_mid_t mid = request->mid;
-
-
-            switch (riid) {
-                case Server_main_iid:
-                    switch (mid) {
-                        case Echo_Echo_mid:
-                            {
-
-                                struct Echo_Echo_req *req_ = (struct Echo_Echo_req *) request;
-                                struct Echo_Echo_res *res_ = (struct Echo_Echo_res *) response;
-
-                                nk_uint32_t msgLen = 0;
-                                nk_char_t *msg = nk_arena_get(nk_char_t, req_arena, &req_->value, &msgLen);
-                                if (msg == RTL_NULL) {
-                                    fprintf(stderr, "[Server]: Error: can`t get message from arena!\n");
-                                    rc = NK_EBADMSG;
-                                } else {
-                                    fprintf(stderr, "%s\n", msg);
-                                    rc = NK_EOK;
-
-                                }
-
-                                if (rc == NK_EOK) {
-                                    if (nk_msg_check_err(response)) {
-                                        nk_err_reset(&res_->err_);
-                                        nk_msg_set_ncaps(res_, Echo_Echo_err_handles);
-                                    } else {
-                                        nk_req_reset(&res_->res_);
-                                        nk_msg_set_ncaps(res_, Echo_Echo_res_handles);
-                                    }
-                                }
-                                response->iid = riid;
-                                response->mid = mid;
-                            }
-
-                            break;
-                        default:
-                            fprintf(stderr, "unknown riid %d\n", request->iid);
-                            break;
-                    }
-                    break;
-                default:
-                    fprintf(stderr, "unknown riid %d\n", request->iid);
-                }
-            }
-
-
-            /* Send response. */
-            if (nk_transport_reply(&transport.base, &res->base_, res_arena) != NK_EOK) {
-                fprintf(stderr, "nk_transport_reply error\n");
-            }
-        }
-        while (true);
-
+    mhs_from_Int(s, 3, rc);
 }
+
+void syscallReply(int s)
+{
+    Handle            handle    = mhs_to_Int(s, 0);
+    nk_message       *res       = mhs_to_Ptr(s, 1);
+    struct nk_arena  *res_arena = mhs_to_Ptr(s, 2);
+
+    SMsgHdr msg;
+    PackOutMsg (&msg, res, res_arena);
+    Retcode rc = Reply (handle, &msg);
+    if (rc != rcOk) {
+        rtl_printf("Reply operation has failed with rc = "RETCODE_HR_FMT"\n", RETCODE_HR_PARAMS(rc));
+    }
+
+    mhs_from_Int(s, 3, rc);
+}
+
 
 
 
 
 static struct ffi_entry table[] = {
 { "syscallCall",           syscallCall},
+{ "syscallRecv",           syscallRecv},
+{ "syscallReply",          syscallReply},
 { "serverLocatorConnect",  serverLocatorConnect},
-{ "serverLocatorRegister",  serverLocatorRegister},
+{ "serverLocatorRegister", serverLocatorRegister},
 { "serviceLocatorGetRiid", serviceLocatorGetRiid},
 { "nkArenaInit",           nkArenaInit},
 { "nkArenaStoreString",    nkArenaStoreString},
 { "nkFillEnvelope",        nkFillEnvelope},
-{ "serverMain",            serverMain},
+{ "nkEnvelopeMid",         getEnvelopeMid},
+{ "nkSetEnvelopeMid",      setEnvelopeMid},
+{ "nkEnvelopeRiid",        getEnvelopeRiid},
+{ "nkSetEnvelopeRiid",     setEnvelopeRiid},
+{ "nkArenaGetString",      nkArenaGetString},
 { 0,0 }
 };
 struct ffi_entry *xffi_table = table;

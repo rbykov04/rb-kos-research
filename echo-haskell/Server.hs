@@ -7,18 +7,29 @@ import Foreign.Storable
 import Data.Word
 import KosTransport
 import Echo
+import System.IO (hPutStrLn , stderr)
 
-foreign import ccall "serverMain" c_serverMain ::
-                    Word32 ->
-                    Ptr () -> Ptr () ->
-                    Ptr () -> Ptr () ->
-                    IO ()
+
+    --(Riid (CUShort riid)) <- getEnvelopeRiid req_
+    --(Mid (CUShort mid))  <- getEnvelopeMid req_
+    -- FIXME: Problem in access to mid
+    --hPutStrLn stderr $ "mid ==" ++  show mid ++ "\n"
+
 
 serverMain :: Handle -> KosStorage -> KosStorage -> IO ()
-serverMain (Handle h) (KosStorage req reqArena) (KosStorage res resArena) = do
-    c_serverMain h req reqArena res resArena
+serverMain handle req res = do
+    recv handle req
+    text <- getString req valueOffset
+    hPutStrLn stderr $ text
+    reply handle res
+    return ()
+
+loop :: Handle -> IO ()
+loop h = do
+  withKosRpcMessage Echo (Riid (CUShort 0)) (serverMain h)
+  loop h
 
 main :: IO ()
 main = do
   h <- serverLocatorRegister "server_connection"
-  withKosRpcMessage Echo (Riid (CUShort 111)) (serverMain h)
+  loop h
