@@ -43,11 +43,6 @@ build/Echo.idl.h: Echo.idl
 		${NK_GEN_FLAGS} \
 	-o build
 
-
-
-build/Server: build server.c build/Server.edl.h
-	${CC} server.c -o build/Server
-
 build/Server.edl.h: Server.edl Echo.idl
 	${SDK}/toolchain/bin/nk-gen-c \
 		Server.edl \
@@ -119,7 +114,7 @@ SECURITY_MODULE_FLAGS = -fno-pic \
 build/ksm.module: build/security.psl.c
 	${CC} ${SECURITY_MODULE_FLAGS} build/security.psl.c -o build/ksm.module
 
-build/kos-qemu-image: build/Client build/Server build/Init build/ksm.module Hello
+build/kos-qemu-image: build/Client Server build/Init build/ksm.module Hello
 	cd build && \
 	${SDK}/toolchain/bin/kos_make_kimg \
 	--target=aarch64-kos \
@@ -134,14 +129,30 @@ build/kos-qemu-image: build/Client build/Server build/Init build/ksm.module Hell
     --with-init=Init \
     ../Hello \
     Client \
-    Server \
+    ../Server \
     ksm.module
 
-runHost: HelloHost
-	./HelloHost
+Server: Server.c ffi.c build build/Server.edl.h
+	${CC} -O3 \
+		ffi.c \
+		Server.c \
+		eval-kos-64.c \
+		-static \
+		-o Server
+
+Server.c: Server-opt.comb Addcombs
+	./Addcombs Server-opt.comb Server.c
+
+Server-opt.comb: Server.comb
+	$(BIN)/mhseval +RTS -rServer.comb -oServer-opt.comb
+
+Server.comb: Server.hs MicroHs
+	MHSDIR=$(MHSDIR) $(BIN)/gmhs -i$(LIB) Server -oServer.comb
+
+
 
 Hello: Hello.c ffi.c
-	${CC} \
+	${CC} -O3 \
 		ffi.c \
 		Hello.c \
 		eval-kos-64.c \
@@ -190,6 +201,12 @@ clean:
 	rm -rf Hello
 	rm -rf Hello.comb
 	rm -rf Hello-opt.comb
+	rm -rf Server.c
+	rm -rf Server
+	rm -rf Server.comb
+	rm -rf Server-opt.comb
+
+
 
 distclean:
 	rm -rf MicroHs

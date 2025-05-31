@@ -5,6 +5,7 @@ import Foreign.Ptr
 import Foreign.Marshal.Alloc
 import Foreign.Storable
 import Data.Word
+import System.IO
 
 foreign import ccall "syscallCall" c_syscallCall ::
                     Word32 ->

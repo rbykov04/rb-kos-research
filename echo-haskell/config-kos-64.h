@@ -86,3 +86,6 @@
 #define INTTABLE 0              /* use fixed table of small INT nodes */
 #define SANITY   0              /* do some sanity checks */
 #define STACKOVL 0              /* check for stack overflow */
+
+//#define HEAP_CELLS 50000000 - it is default
+#define HEAP_CELLS   10000

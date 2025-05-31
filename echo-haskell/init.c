@@ -111,7 +111,6 @@ int main(void) {
         fprintf(stderr, "Can't run task \"Client\"\n");
         return EXIT_FAILURE;
     }
-
     if (EntityRun(task_hello_Hello_0) != rcOk) {
         fprintf(stderr, "Can't run task \"Hello\"\n");
         return EXIT_FAILURE;

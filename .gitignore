@@ -49,6 +49,11 @@ echo-haskell/HelloHost
 echo-haskell/Hello.c
 echo-haskell/Hello.comb
 echo-haskell/Hello-opt.comb
+echo-haskell/Server
+echo-haskell/ServerHost
+echo-haskell/Server.c
+echo-haskell/Server.comb
+echo-haskell/Server-opt.comb
 echo-haskell/Addcombs
 echo-haskell/.mhsi
 
