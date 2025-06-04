@@ -130,14 +130,12 @@ void nkArenaStoreString(int s)
 void nkArenaGetString(int s)
 {
 
-    nk_ptr_t          *value     = mhs_to_Ptr(s, 0) + mhs_to_Int(s, 3);
-    struct nk_arena   *arena = mhs_to_Ptr(s, 1);
-    char *buf                    = mhs_to_Ptr(s, 2);
+    nk_ptr_t          *value     = mhs_to_Ptr(s, 0) + mhs_to_Int(s, 2);
+    struct nk_arena   *arena     = mhs_to_Ptr(s, 1);
 
     nk_uint32_t msgLen = 0;
     nk_char_t *msg = nk_arena_get(nk_char_t, arena, value, &msgLen);
-    memcpy(buf, msg, msgLen);
-    mhs_from_Ptr (s, 4, buf);
+    mhs_from_Ptr (s, 3, msg);
 }
 
 

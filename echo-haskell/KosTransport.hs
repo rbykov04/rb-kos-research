@@ -21,7 +21,7 @@ foreign import ccall "serverLocatorRegister" c_serverLocatorRegister ::  CString
 foreign import ccall "serviceLocatorGetRiid" c_serviceLocatorGetRiid ::  Word32 -> CString -> IO (CUShort)
 foreign import ccall "nkArenaInit" c_nkArenaInit ::  Ptr () -> Ptr () -> Int -> IO ()
 foreign import ccall "nkArenaStoreString" c_nkArenaStoreString ::  Ptr () -> Ptr () -> Int -> CString -> Int -> IO ()
-foreign import ccall "nkArenaGetString" c_nkArenaGetString  :: Ptr () -> Ptr () -> Ptr () -> Int -> IO (CString)
+foreign import ccall "nkArenaGetString" c_nkArenaGetString  :: Ptr () -> Ptr () -> Int -> IO (CString)
 
 foreign import ccall "nkFillEnvelope" c_nkFillVenvelope :: Ptr () -> Int -> CUShort -> CUShort -> CUInt -> IO ()
 foreign import ccall "nkEnvelopeMid" c_nkEnvelopeMid :: Ptr () -> IO (CUShort)
@@ -97,8 +97,7 @@ storeString (KosStorage req reqArena) offset text = do
 
 getString  :: KosStorage -> Int -> IO (String)
 getString (KosStorage req reqArena) offset = do
-    allocaBytes 200 $ \ buf -> do
-      c_str <- c_nkArenaGetString req reqArena buf offset
+      c_str <- c_nkArenaGetString req reqArena offset
       text <- peekCAString c_str
       return text
 

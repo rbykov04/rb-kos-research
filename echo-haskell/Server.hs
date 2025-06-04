@@ -15,6 +15,8 @@ import System.IO (hPutStrLn , stderr)
     -- FIXME: Problem in access to mid
     --hPutStrLn stderr $ "mid ==" ++  show mid ++ "\n"
 
+echoRiid :: Riid
+echoRiid = Riid (CUShort 0)
 
 serverMain :: Handle -> KosStorage -> KosStorage -> IO ()
 serverMain handle req res = do
@@ -26,7 +28,7 @@ serverMain handle req res = do
 
 loop :: Handle -> IO ()
 loop h = do
-  withKosRpcMessage Echo (Riid (CUShort 0)) (serverMain h)
+  withKosRpcMessage Echo echoRiid (serverMain h)
   loop h
 
 main :: IO ()
