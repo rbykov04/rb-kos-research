@@ -9,29 +9,23 @@ import KosTransport
 import Echo
 import System.IO (hPutStrLn , stderr)
 
-
-    --(Riid (CUShort riid)) <- getEnvelopeRiid req_
-    --(Mid (CUShort mid))  <- getEnvelopeMid req_
-    -- FIXME: Problem in access to mid
-    --hPutStrLn stderr $ "mid ==" ++  show mid ++ "\n"
-
 echoRiid :: Riid
 echoRiid = Riid (CUShort 0)
-
-test :: Int
-test = 10
 
 serverMain :: Handle -> KosStorage -> KosStorage -> IO ()
 serverMain handle req res = do
     recv handle req
-    mid  <- getEnvelopeMid req
-    --error "ERROR BLA BLA BLA"
-    hPutStrLn stderr $ "test =="  ++  show test ++ "\n"
-    --hPutStrLn stderr $ "mid =="  ++  show mid ++ "\n"
-    text <- getString req valueOffset
-    hPutStrLn stderr $ text
-    reply handle res
-    return ()
+    (Mid (CUShort mid))  <- getEnvelopeMid req
+    if mid == 0
+    then do
+      text <- getString req valueOffset
+      hPutStrLn stderr $ text
+      reply handle res
+      return ()
+    else do
+      hPutStrLn stderr $ "Mid is not correct. mid == "  ++  show mid ++ "\n"
+      error "panic"
+      return ()
 
 loop :: Handle -> IO ()
 loop h = do

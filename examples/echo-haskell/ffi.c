@@ -27,9 +27,8 @@
 void getEnvelopeMid(int s)
 {
     nk_message *envelope = mhs_to_Ptr(s, 0);
-    //mhs_from_CUShort(s, 1, envelope->mid);
-    //mhs_from_Int(s, 1, envelope->mid);
-    mhs_from_Int(s, 1, 0);
+    mhs_from_CUShort(s, 1, envelope->mid);
+    mhs_from_CUShort(s, 1, -1);
 }
 
 void setEnvelopeMid(int s)

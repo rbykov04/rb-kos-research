@@ -8,7 +8,7 @@ say handle riid text =
     storeString req valueOffset text
     call handle req res
 
-main :: IO Int
+main :: IO ()
 main = do
   h <- serverLocatorConnect "server_connection"
   r <- serviceLocatorGetRiid h "Server.main"
@@ -19,3 +19,4 @@ main = do
   say h r "4 Hello From Haskell \0"
   say h r "5 Hello From Haskell \0"
   say h r "6 Hello From Haskell \0"
+  return ()
