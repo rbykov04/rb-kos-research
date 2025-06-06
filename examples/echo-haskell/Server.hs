@@ -18,9 +18,16 @@ import System.IO (hPutStrLn , stderr)
 echoRiid :: Riid
 echoRiid = Riid (CUShort 0)
 
+test :: Int
+test = 10
+
 serverMain :: Handle -> KosStorage -> KosStorage -> IO ()
 serverMain handle req res = do
     recv handle req
+    mid  <- getEnvelopeMid req
+    --error "ERROR BLA BLA BLA"
+    hPutStrLn stderr $ "test =="  ++  show test ++ "\n"
+    --hPutStrLn stderr $ "mid =="  ++  show mid ++ "\n"
     text <- getString req valueOffset
     hPutStrLn stderr $ text
     reply handle res

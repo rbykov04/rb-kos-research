@@ -24,7 +24,8 @@ foreign import ccall "nkArenaStoreString" c_nkArenaStoreString ::  Ptr () -> Ptr
 foreign import ccall "nkArenaGetString" c_nkArenaGetString  :: Ptr () -> Ptr () -> Int -> IO (CString)
 
 foreign import ccall "nkFillEnvelope" c_nkFillVenvelope :: Ptr () -> Int -> CUShort -> CUShort -> CUInt -> IO ()
-foreign import ccall "nkEnvelopeMid" c_nkEnvelopeMid :: Ptr () -> IO (CUShort)
+--foreign import ccall "nkEnvelopeMid" c_nkEnvelopeMid :: Ptr () -> IO (CUShort)
+foreign import ccall "nkEnvelopeMid" c_nkEnvelopeMid :: Ptr () -> IO (Int)
 foreign import ccall "nkEnvelopeRiid" c_nkEnvelopeRiid :: Ptr () -> IO (CUShort)
 foreign import ccall "nkSetEnvelopeMid" c_nkSetEnvelopeMid :: Ptr () -> CUShort-> IO ()
 foreign import ccall "nkSetEnvelopeRiid" c_nkSetEnvelopeRiid :: Ptr () -> CUShort -> IO ()
@@ -53,10 +54,10 @@ serviceLocatorGetRiid (Handle h) endpoint = do
 arenaStructSize :: Int
 arenaStructSize = 3 * 8 --HACK?
 
-getEnvelopeMid :: KosStorage -> IO (Mid)
+getEnvelopeMid :: KosStorage -> IO (Int)
 getEnvelopeMid (KosStorage envelope _) = do
-   mid <- c_nkEnvelopeMid envelope
-   return (Mid mid)
+    mid <- c_nkEnvelopeMid envelope
+    return mid
 
 getEnvelopeRiid :: KosStorage -> IO (Riid)
 getEnvelopeRiid (KosStorage envelope _) = do
